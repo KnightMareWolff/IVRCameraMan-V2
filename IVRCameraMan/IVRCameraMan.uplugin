@@ -1,0 +1,54 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "2.0",
+	"FriendlyName": "IVRCameraMan",
+	"Description": "A Video Recording Tool for Virtual Production",
+	"Category": "Cameras",
+	"CreatedBy": "William D. Wolff",
+	"CreatedByURL": "http://insaneframework.com",
+	"DocsURL": "http://insaneframework.com/ivr-camera-man/",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/099c0fd27b6e434db3adfaec71a2b82c",
+	"SupportURL": "http://insaneframework.com/ivr-camera-man/",
+  "EngineVersion": "4.27.0",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "IVRCameraMan",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "IVRCameraManEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "IVRCVHelper",
+			"Type": "Runtime",
+			"LoadingPhase": "EarliestPossible",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "AudioCapture",
+			"Enabled": true
+		},
+		{
+			"Name": "Composure",
+			"Enabled": true
+		}
+	]
+}
