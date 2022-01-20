@@ -105,7 +105,7 @@ void AIVR_OnRailCamera::Tick(float DeltaTime)
 		}
 		//First we record the frame...Warning!(This is the only thing we dont include on the thread, cause Tick sync problems)
 		IVR_RailCam->IVR_SetTransform(pCamMount->GetComponentTransform());
-		IVR_RailCam->IVR_CustomTick(DeltaTime);
+		IVR_RailCam->IVR_CustomTick();
 		AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
 		{
 			IVR_CurrentSplineTime = (((GetWorld()->GetTimeSeconds() - IVR_StartTime)) / IVR_TotalPathTime);

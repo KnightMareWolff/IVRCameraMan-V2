@@ -110,7 +110,7 @@ void AIVR_OnCraneCamera::Tick(float DeltaTime)
 		}
 
 		IVR_CraneCam->IVR_SetTransform(pCamMount->GetComponentTransform());
-		IVR_CraneCam->IVR_CustomTick(DeltaTime);
+		IVR_CraneCam->IVR_CustomTick();
 
 		AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
 		{
@@ -124,28 +124,29 @@ void AIVR_OnCraneCamera::Tick(float DeltaTime)
 				CranePitch = CurrentFrame.Z;
 				CraneYaw = CurrentFrame.Y;
 				CraneArmLength = CurrentFrame.X;
-			}
-			// The CurrentSplineTime start at 0.0f AND GO TO 1.0f
-			if (IVR_CraneAnimation->IVR_AnimationFinished())
-			{
-				if (IVR_Loop)
+
+				// The CurrentSplineTime start at 0.0f AND GO TO 1.0f
+				if (IVR_CraneAnimation->IVR_AnimationFinished())
 				{
-					if (IVR_NumberOfLaps == IVR_MaxLoopLaps)
+					if (IVR_Loop)
 					{
-						IVR_StopCrane();
+						if (IVR_NumberOfLaps == IVR_MaxLoopLaps)
+						{
+							IVR_StopCrane();
+						}
+						else
+						{
+
+							IVR_NumberOfLaps++;
+							IVR_StartTime = GetWorld()->GetTimeSeconds();
+							IVR_CraneAnimation->IVR_PlayTimeline();
+
+						}
 					}
 					else
 					{
-
-						IVR_NumberOfLaps++;
-						IVR_StartTime = GetWorld()->GetTimeSeconds();
-						IVR_CraneAnimation->IVR_PlayTimeline();
-
+						IVR_StopCrane();
 					}
-				}
-				else
-				{
-					IVR_StopCrane();
 				}
 			}
 		});

@@ -2,5 +2,7 @@
 
 CIVRCameraTake::CIVRCameraTake()
 {
-
+   IVR_TakeID = 0;
 }
+
+

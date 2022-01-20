@@ -31,6 +31,7 @@ UIVR_CameraComponent::UIVR_CameraComponent()
 
 	//Initialize the Default Processing State
 	IVR_RecordingState = 2;//Initially Iddle
+	IVR_BufferCache    = 1;
 	IVR_FPS = 0;
 	IVR_Enabled = false;
 	IVR_EnableStabilization = true;
@@ -56,6 +57,9 @@ UIVR_CameraComponent::UIVR_CameraComponent()
 	IVR_CollisionSphere->SetupAttachment(IVR_Stabilizer);
 	
 	IVR_LockedRendering = false;
+
+	IVR_LowLevelCam = nullptr;
+
 }
 
 
@@ -66,34 +70,28 @@ void UIVR_CameraComponent::BeginPlay()
 	// ...
 }
 
-bool UIVR_CameraComponent::IVR_CaptureFrame(float DeltaTime)
+void UIVR_CameraComponent::IVR_RegisterCamera(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode)
 {
-	//Here you put your Thread safe code, ok?
-	AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this, DeltaTime]()
+	if (IVR_LowLevelCam == nullptr)
 	{
-		FVector pIVR_Pos = GetComponentLocation();
-		FVector pIVR_Rot = GetComponentRotation().Vector();
-		FVector pIVR_Scl = GetComponentScale();
+		FString CamName = CameraName;
 
-		IVR_FrameBuffer.IVR_IsValid    = true;
-		IVR_FrameBuffer.IVR_CameraName = QString(TCHAR_TO_UTF8(*IVR_CameraName));
-		IVR_FrameBuffer.IVR_CameraType = IVR_LowLevelType;
-		IVR_FrameBuffer.IVR_Width      = IVR_Width;
-		IVR_FrameBuffer.IVR_Height     = IVR_Height;
-		IVR_FrameBuffer.IVR_CameraID   = IVR_LowLevelIndex;
-		IVR_FrameBuffer.IVR_FrameFPS   = IVR_FPS;
-		IVR_FrameBuffer.IVR_FrameDT    = DeltaTime;
-		IVR_FrameBuffer.IVR_Position   = QVector3D(pIVR_Pos.X, pIVR_Pos.Y, pIVR_Pos.Z);
-		IVR_FrameBuffer.IVR_Rotation   = QVector3D(pIVR_Rot.X, pIVR_Rot.Y, pIVR_Rot.Z);
-		IVR_FrameBuffer.IVR_Scale      = QVector3D(pIVR_Scl.X, pIVR_Scl.Y, pIVR_Scl.Z);
-		IVR_FrameBuffer.IVR_Timestamp  = FDateTime::UtcNow().ToUnixTimestamp();
+		QString pCamName = QString(TCHAR_TO_UTF8(*CamName));
+		uint    pLowIndex;
+		uint    pLowType = LowLevelType;
+		uint    pLowMode = LowLevelRecordingMode;
+		qint64  pTimestamp = FDateTime::UtcNow().ToUnixTimestamp();
 
-		IVR_LockedRendering = true;
-	});
-	
-	//huhuuuu!
-	return true;
+		IVR_LowLevelCam = UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_AddVirtualCam(pLowIndex,
+			pLowType,
+			pLowMode,
+			pCamName,
+			pTimestamp);
 
+		IVR_CameraName    = CamName;
+		IVR_LowLevelIndex = (int)pLowIndex;
+		IVR_LowLevelType  = (int)pLowType;
+	}
 }
 
 // Warning Pixel format mismatch
@@ -113,52 +111,31 @@ void UIVR_CameraComponent::OnBackBufferReady(SWindow& SlateWindow, const FTextur
 		FRHITexture2D* CachedTexture = IVR_RenderTarget->Resource->TextureRHI->GetTexture2D();
 
 		FRHICopyTextureInfo CopyInfo;
-
 		//Copy the BackBuffer to the Cached Texture
 		RHICmdList.CopyTexture(BackBuffer, CachedTexture, CopyInfo);
-
+		
 		//Get the Pixels of the Image
-		TArray<FColor> RawPixels;
-		GetTexturePixels(CachedTexture, RawPixels);
-		AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this, RawPixels]()
-		{
-			IVR_BufferSection.Lock();
-			
-			//If you reach this condition, means you change the video size in the middle of production.
-			if (IVR_FrameBuffer.IVR_Buffer.size() != (IVR_Width * IVR_Height) * RawPixels.GetTypeSize())
-			{
-				IVR_FrameBuffer.IVR_Buffer.clear();
-			}
-						
-			IVR_FrameBuffer.IVR_ColorChannels = RawPixels.GetTypeSize();
-			
-			//Check if we are in the beginning of a recording or can use the Cached Texture
-			if (IVR_FrameBuffer.IVR_Buffer.size() == 0)IVR_FrameBuffer.IVR_Buffer = QByteArray::fromRawData((char*)RawPixels.GetData(), (IVR_Width * IVR_Height) * RawPixels.GetTypeSize());
-			else
-			IVR_FrameBuffer.IVR_Buffer.setRawData((char*)RawPixels.GetData(), (IVR_Width * IVR_Height) * RawPixels.GetTypeSize());
+		GetTexturePixels(CachedTexture, IVR_RawBuffer);
 
-			//Insert the Raw Image at the Render queue
-			UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_RecordBuffer(IVR_FrameBuffer);
-
-			IVR_BufferSection.Unlock();
-		});
-		//Lock the delegate to receive another signal
+		//Lock the next rendering
 		IVR_LockedRendering = false;
 	}
 }
 
 
 // Called every frame
-void UIVR_CameraComponent::IVR_CustomTick(float DeltaTime)
+void UIVR_CameraComponent::IVR_CustomTick()
 {
-	IVR_FPS = (1.0 / DeltaTime);
-
+	IVR_DT  = (GetWorld()->GetTimeSeconds() - IVR_StartTime);
+	IVR_FPS = (1.0 / IVR_DT);
+	
 	//Draw Debbug Camera, only if enabled by the Director
 	if (UIVR_FunctionLibrary::pIVR_DrawDebbug)
 	{
-		DrawDebugCamera(GetWorld(), IVR_Stabilizer->GetComponentLocation(), IVR_Stabilizer->GetComponentRotation(), 45.0f, 10.0f, FColor::Black, false, -1, 0);
+		DrawDebugCamera(GetWorld(), IVR_Stabilizer->GetComponentLocation(), 
+			                        IVR_Stabilizer->GetComponentRotation(), 
+			                        45.0f, 10.0f, FColor::Black, false, -1, 0);
 	}
-
 
 	switch (IVR_RecordingState)
 	{
@@ -184,14 +161,51 @@ void UIVR_CameraComponent::IVR_CustomTick(float DeltaTime)
 
 				//We Enable the Camera
 				IVR_Enabled = true;
+
 				// Fire Up the Render Queue
 				OnBackBufferReadyToPresent = FSlateApplication::Get().GetRenderer()->OnBackBufferReadyToPresent().AddUObject(this, &UIVR_CameraComponent::OnBackBufferReady);
+
 			});
 		}
 
 		//Capture The Frame Information and free the BackBuffer to be sent to LowLevel API.
-		IVR_CaptureFrame(DeltaTime);
+		if (IVR_RawBuffer.Num()>0)
+		{
+			if (IsInGameThread() && !IsInRenderingThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [this]()
+				{
+					//IVR_BufferSection.Lock();
 
+					IVR_FrameInformation.IVR_IsValid = true;
+					IVR_FrameInformation.IVR_CameraName = QString(TCHAR_TO_UTF8(*IVR_CameraName));
+					IVR_FrameInformation.IVR_CameraType = (uint)IVR_LowLevelType;
+					IVR_FrameInformation.IVR_CameraID = (uint)IVR_LowLevelIndex;
+					IVR_FrameInformation.IVR_FrameFPS = (uint)IVR_FPS;
+					IVR_FrameInformation.IVR_FrameDT = IVR_DT;
+					IVR_FrameInformation.IVR_Timestamp = FDateTime::UtcNow().ToUnixTimestamp();
+
+					IVR_LowLevelCam->IVR_RecordData(IVR_FrameInformation);
+
+					IVR_FrameBuffer.IVR_Width = IVR_Width;
+					IVR_FrameBuffer.IVR_Height = IVR_Height;
+					IVR_FrameBuffer.IVR_ColorChannels = IVR_RawBuffer.GetTypeSize();
+
+					if (IVR_FrameBuffer.IVR_Buffer.total() > 0)IVR_FrameBuffer.IVR_Buffer = Mat();
+					IVR_FrameBuffer.IVR_Buffer = Mat(IVR_Height, IVR_Width, CV_8UC4, (char*)IVR_RawBuffer.GetData());
+
+					//Insert the Raw Image at the Render queue
+					IVR_LowLevelCam->IVR_RecordBuffer(IVR_FrameBuffer);
+
+					IVR_RawBuffer.Empty();
+
+					//IVR_BufferSection.Unlock();
+				});
+			}
+		}
+
+		IVR_LockedRendering = true;
+		
 	}break;
 	case 1: //Stop Recording
 	{
@@ -208,6 +222,9 @@ void UIVR_CameraComponent::IVR_CustomTick(float DeltaTime)
 		}
 	}break;
 	}
+
+	// For Each Tick...
+	IVR_StartTime = GetWorld()->GetTimeSeconds();
 }
 
 bool UIVR_CameraComponent::IVR_StartRecord()
@@ -219,9 +236,10 @@ bool UIVR_CameraComponent::IVR_StartRecord()
 		return false;
 	}
 
-	//If the camera are lowlevel recording (IsRecording == true) we bypass the start command.
-	bool LowLevelRecordingState = UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_CheckRecordingState((uint)IVR_LowLevelIndex);
-	if (LowLevelRecordingState)return false;
+	//Fire-Up the LowLevel Render Queue
+	IVR_LowLevelCam->IVR_StartRecord();
+	// Time when the press play...
+	IVR_StartTime = GetWorld()->GetTimeSeconds();
 
 	IVR_RecordingState = 0;
 	return true;
@@ -236,6 +254,11 @@ bool UIVR_CameraComponent::IVR_StopRecord()
 		return false;
 	}
 
+	//Shut-Down the LowLevel Render Queue
+	IVR_LowLevelCam->IVR_StopRecord();
+	// Time when the press play...
+	IVR_StartTime = GetWorld()->GetTimeSeconds();
+
 	IVR_RecordingState = 1;
 	return true;
 }
@@ -248,18 +271,9 @@ bool UIVR_CameraComponent::IVR_CompileVideo()
 		return false;
 	}
 
-	//If the camera are lowlevel recording (IsRecording == true) we bypass the start command.
-	bool LowLevelRecordingState = UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_CheckRecordingState((uint)IVR_LowLevelIndex);
-	if (LowLevelRecordingState)return false;
+	//Request the Take Compilation
+	IVR_LowLevelCam->IVR_CompileTake();
 
-	//Attention!
-	//Do not try include an AsyncTask Here! There is another thread with lock in lowlevel handling it.
-	//AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
-	//{
-		//IVR_RecCamSection.Lock();
-		UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_HeadShotVideoRecord((uint)IVR_LowLevelIndex, (uint)IVR_LowLevelType);
-		//IVR_RecCamSection.Unlock();
-	//});
 	return true;
 	
 }

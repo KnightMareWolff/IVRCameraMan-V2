@@ -29,7 +29,7 @@ xcopy "..\..\libs\Qt\vc16\QtCore" /s ".\sdk\include\QtCore"
 xcopy "..\..\libs\Qt\vc16\QtGui" /s ".\sdk\include\QtGui"
 xcopy "..\..\libs\Qt\vc16\QtWidgets" /s ".\sdk\include\QtWidgets"
 
-C:\Qt\5.15.2\msvc2019_64\bin\windeployqt --release .\IVRTool.exe
+D:\Qt\5.15.2\msvc2019_64\bin\windeployqt --release .\IVRTool.exe
 
 xcopy ".\D3Dcompiler_47.dll" ".\sdk"
 xcopy ".\libEGL.dll" ".\sdk"

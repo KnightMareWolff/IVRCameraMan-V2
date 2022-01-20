@@ -45,8 +45,12 @@ public:
 	bool IVR_LoadDefault();
 	
 
-	UFUNCTION(Category = "CameraMan|Video|Functions ", BlueprintCallable)
-	void CameraGrabbSpawner();
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	void IVR_GrabbSpawner();
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	void IVR_StartMan();
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	void IVR_StopMan();
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = "true"), Category = "Camera Parameters")

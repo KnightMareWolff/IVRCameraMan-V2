@@ -50,13 +50,10 @@ public:
 	UFUNCTION(Category = "CameraMan|Components|IVR_CameraComponent", BlueprintCallable)
 	bool IVR_SetRotation(FRotator    pRotation);
 	UFUNCTION(Category = "CameraMan|Components|IVR_CameraComponent", BlueprintCallable)
-	void IVR_CustomTick(float DeltaTime);
+	void IVR_CustomTick();
+	UFUNCTION(Category = "CameraMan|Components|IVR_CameraComponent", BlueprintCallable)
+	void IVR_RegisterCamera(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode);
 	
-	//----------------------------------------------
-	//Internal Functions(Not Exposed to Blueprints)
-	//----------------------------------------------
-	bool IVR_CaptureFrame(float DeltaTime);
-
 	//-----------------------------------------
 	//Base Camera Blueprint Attributes
 	//-----------------------------------------
@@ -85,12 +82,18 @@ public:
 	int32                     IVR_LowLevelIndex;
 	int32                     IVR_LowLevelType;
 	int32                     IVR_LowLevelRecordingType;
+	int32                     IVR_BufferCache;
 	float                     IVR_FPS;
+	float                     IVR_DT;
 	FString                   IVR_RecordingPath;
 	FConfigFile               IVR_ProjectConfigFile;
 	uint                      IVR_RecordingState;
 	bool                      IVR_Enabled;
 	bool                      IVR_LockedRendering;
+	CIVRVirtualCamera*        IVR_LowLevelCam;
+
+	//Time Measuring
+	float      IVR_StartTime;
 	
 	//-----------------------------------------------
 	//Render Capture Attributes
@@ -108,8 +111,10 @@ public:
 	FCriticalSection          IVR_AddCamSection;
 	FCriticalSection          IVR_UpdCamSection;
 	FCriticalSection          IVR_RecCamSection;
-	
+
+	TArray<FColor>   IVR_RawBuffer;
 	IVR_RenderBuffer IVR_FrameBuffer;
+	IVR_FrameData    IVR_FrameInformation;
 	
 	//-----------------------------------------------
 	//Render Capture Functions

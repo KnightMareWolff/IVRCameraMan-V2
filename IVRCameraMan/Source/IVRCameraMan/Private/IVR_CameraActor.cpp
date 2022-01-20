@@ -29,34 +29,19 @@ void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, int32 LowLevelType
 	if (IVR_ActorCam != nullptr)
 	{
 		FString CamName = CameraName +	FString::FromInt(UIVR_FunctionLibrary::IVR_GetCameraCounter(LowLevelType));
-
-		QString pCamName = QString(TCHAR_TO_UTF8(*CamName));
-		uint    pLowIndex;
-		uint    pLowType = LowLevelType;
-		uint    pLowMode = LowLevelRecordingMode;
-		qint64  pTimestamp = FDateTime::UtcNow().ToUnixTimestamp();
-
-		UIVR_FunctionLibrary::pIVR_LowLevelInterface->IVR_AddVirtualCam(pLowIndex, 
-			                                                            pLowType,
-			                                                            pLowMode,
-			                                                            pCamName, 
-			                                                            IVR_ActorCam->IVR_FPS, 
-			                                                            IVR_ActorCam->IVR_EnableStabilization, 
-			                                                            IVR_ActorCam->IVR_Enabled, 
-			                                                            pTimestamp);
-		IVR_ActorCam->IVR_CameraName    = CamName;
-		IVR_ActorCam->IVR_LowLevelIndex = (int)pLowIndex;
-		IVR_ActorCam->IVR_LowLevelType  = (int)pLowType;
+		
+		IVR_ActorCam->IVR_RegisterCamera(CamName, LowLevelType, LowLevelRecordingMode);
+		
 		IVR_SelfRegistered = true;
 	}
 }
 // Called every frame
-void AIVR_CameraActor::IVR_CustomTick(float DeltaTime)
+void AIVR_CameraActor::IVR_CustomTick()
 {
 	// Update target
 	if ((IVR_ActorCam != nullptr) && (IVR_MoveCamera))
 	{
-		IVR_ActorCam->IVR_CustomTick(DeltaTime);
+		IVR_ActorCam->IVR_CustomTick();
 	}
 }
 

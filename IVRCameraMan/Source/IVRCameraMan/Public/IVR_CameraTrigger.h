@@ -60,7 +60,7 @@ public:
 		EActionType  IVR_TriggerActionOut;
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "IVR_Camera Trigger Parameters")
 	class UBoxComponent* IVR_TriggerVolume;
 
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraTrigger", BlueprintCallable)

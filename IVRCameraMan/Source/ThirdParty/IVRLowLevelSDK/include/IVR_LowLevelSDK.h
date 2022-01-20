@@ -8,7 +8,7 @@
 #include "IVR_VideoReader.h"
 #include "IVR_VirtualCamera.h"
 #include "IVR_CameraTake.h"
-#include "IVR_TaskQueue.h"
+#include "IVR_LockFreeQueue.h"
 
 
 class IVRLOWLEVELSDK_EXPORT IVRLowLevelSDK : public QObject
@@ -22,25 +22,15 @@ public:
     bool IVR_SetConfPath  (QString &pDAIAbsolutePath);
     void IVR_SetDebugMode (bool pIVR_DebbugMode     );
     void IVR_SetWaitRecord(uint pIVR_MsecToWait     );
+    void IVR_SetResolution(int  pIVR_Width,int  pIVR_Height);
     void IVR_SpawnStage   (                         );
 
-    bool IVR_RecordBuffer (IVR_RenderBuffer &pIVR_FrameBuffer);
+    CIVRVirtualCamera* IVR_AddVirtualCam(uint             &pIVR_CameraId    ,
+                                         uint              pIVR_CamType     ,
+                                         uint              pIVR_RecMode     ,
+                                         QString          &pIVR_CameraName  ,
+                                         qint64            pIVR_Timestamp   );
 
-    bool IVR_AddVirtualCam(uint             &pIVR_CameraId    ,
-                           uint              pIVR_CamType     ,
-                           uint              pIVR_RecMode     ,
-                           QString          &pIVR_CameraName  ,
-                           float             pIVR_FPS         ,
-                           bool              pIVR_IsStabilized,
-                           bool              pIVR_IsEnabled   ,
-                           qint64            pIVR_Timestamp   );
-
-    bool IVR_UpdVirtualCam(uint              pIVR_CameraId    ,
-                           uint              pIVR_CamType     ,
-                           QString          &pIVR_CameraName  ,
-                           float             pIVR_FPS         ,
-                           bool              pIVR_IsStabilized,
-                           bool              pIVR_IsEnabled   );
 
     //"Out of the Box" GUI
     void IVR_FireUpGUIThread();
@@ -55,32 +45,24 @@ public:
     //Thread Functions
     void IVR_FireGUIThread();
 
-    //Processing Pipelines
-    void IVR_CamRecLoopThread();
-
-    void IVR_RecordTake(uint pIVR_CameraId , QString IVR_RootFolder);
-
     uint IVR_GetCounter(uint pIVR_CamType);
 
     //Miscellaneous Functions
     bool IVR_CheckRecordingState  (uint pIVR_CameraId );
-    bool IVR_HeadShotVideoRecord  (uint pIVR_CameraId ,uint pIVR_CamType);
     bool IVR_CleanUpRecordVSession(                                     );
 
     //Configuration Folders
     QString IVR_RootFolder;
     QString IVR_ConfigFolder;
+    //Width of the Image
+    int     IVR_Width       ;
+    //Height of the Image
+    int     IVR_Height      ;
 
-    vector<CIVRVirtualCamera*> IVR_CameraPool;
-
-    //For every Camera we will have a number of tasks to perform...
-    CIVRTaskQueue         IVR_RecordingPool;
+    static vector<CIVRVirtualCamera*> IVR_CameraPool;
 
     //GUI Thread
     QFuture<void>         IVR_GUIThread;
-
-    //Render Threads Used for frames recording
-    QFuture<void>         IVR_RCThread;
 
     QApplication*  IVR_QtApp;
     bool           IVR_GUIActive;
@@ -88,6 +70,12 @@ public:
 
     bool           IVR_DebbugMode;
     uint           IVR_MSecToWait;
+
+    QMutex          mutex;
+    QWaitCondition  newdataAvailable;
+
+    //Internal Static Config for LowLevel classes
+    CIVRConfig     IVR_Config;
 };
 
 #endif // IVRLOWLEVELSDK_H

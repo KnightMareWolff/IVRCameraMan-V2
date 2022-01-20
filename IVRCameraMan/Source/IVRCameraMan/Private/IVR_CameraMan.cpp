@@ -153,7 +153,7 @@ void AIVR_CameraMan::Tick(float DeltaTime)
 
 		IVR_CharacterCam->IVR_SetTransform(pTransform);
 		IVR_Camera->SetWorldTransform(pTransform);
-		IVR_CharacterCam->IVR_CustomTick(DeltaTime);
+		IVR_CharacterCam->IVR_CustomTick();
 	}
 }
 
@@ -169,7 +169,7 @@ void AIVR_CameraMan::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	
 	PlayerInputComponent->BindAction("StartRecord"  , IE_Pressed, this, &AIVR_CameraMan::StartRecord);
 	PlayerInputComponent->BindAction("StopRecord"   , IE_Pressed, this, &AIVR_CameraMan::StopRecord);
-	PlayerInputComponent->BindAction("GrabbCameras" , IE_Pressed, this, &AIVR_CameraMan::CameraGrabbSpawner); 
+	PlayerInputComponent->BindAction("GrabbCameras" , IE_Pressed, this, &AIVR_CameraMan::IVR_GrabbSpawner); 
 }
 
 // Called to bind functionality to input
@@ -217,6 +217,7 @@ void AIVR_CameraMan::StartRecord()
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("Recording Start!"), true, FVector2D(1.5, 1.5));
 }
+
 void AIVR_CameraMan::StopRecord()
 {
 	IVR_CharacterCam->IVR_StopRecord(IVR_AutoRecord);
@@ -236,7 +237,19 @@ void AIVR_CameraMan::StopRecord()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Recording Stop!"), true, FVector2D(1.5, 1.5));
 }
 
-void AIVR_CameraMan::CameraGrabbSpawner()
+// Called when the game starts or when spawned
+void AIVR_CameraMan::IVR_StartMan()
+{
+	StartRecord();
+}
+
+// Called when the game starts or when spawned
+void AIVR_CameraMan::IVR_StopMan()
+{
+	StopRecord();
+}
+
+void AIVR_CameraMan::IVR_GrabbSpawner()
 {
 	UWorld* pWorld = GetWorld();
 

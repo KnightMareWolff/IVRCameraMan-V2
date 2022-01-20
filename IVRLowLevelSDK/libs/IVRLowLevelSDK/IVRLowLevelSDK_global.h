@@ -24,50 +24,94 @@
 typedef class IVRLOWLEVELSDK_EXPORT IVR_RenderBuffer
 {
 public:
-    IVR_RenderBuffer(                               ) { IVR_IsValid=false; }
+    IVR_RenderBuffer()
+    {
+        IVR_Width          = 0;
+        IVR_Height         = 0;
+        IVR_ColorChannels  = 0;
+        IVR_Buffer         = Mat();
+    }
+
     IVR_RenderBuffer( const IVR_RenderBuffer & copy )
     {
-        IVR_IsValid        = copy.IVR_IsValid;
-        IVR_CameraName     = copy.IVR_CameraName;
-        IVR_CameraType     = copy.IVR_CameraType;
+
         IVR_Width          = copy.IVR_Width;
         IVR_Height         = copy.IVR_Height;
         IVR_ColorChannels  = copy.IVR_ColorChannels;
-        IVR_CameraID       = copy.IVR_CameraID;
-        IVR_FrameID        = copy.IVR_FrameID;
-        IVR_FrameFPS       = copy.IVR_FrameFPS;
-        IVR_Position       = copy.IVR_Position;
-        IVR_Rotation       = copy.IVR_Rotation;
-        IVR_Scale          = copy.IVR_Scale;
-        IVR_Timestamp      = copy.IVR_Timestamp;
-        IVR_Buffer         = copy.IVR_Buffer;
+
+        if (IVR_Buffer.total() > 0)IVR_Buffer = Mat();
+
+        IVR_Buffer         = copy.IVR_Buffer.clone();
     }
 
     IVR_RenderBuffer& operator = (const IVR_RenderBuffer &t)
     {
-        IVR_IsValid        = t.IVR_IsValid;
-        IVR_CameraName     = t.IVR_CameraName;
-        IVR_CameraType     = t.IVR_CameraType;
         IVR_Width          = t.IVR_Width;
         IVR_Height         = t.IVR_Height;
         IVR_ColorChannels  = t.IVR_ColorChannels;
-        IVR_CameraID       = t.IVR_CameraID;
-        IVR_FrameID        = t.IVR_FrameID;
-        IVR_FrameFPS       = t.IVR_FrameFPS;
-        IVR_FrameDT        = t.IVR_FrameDT;
-        IVR_Position       = t.IVR_Position;
-        IVR_Rotation       = t.IVR_Rotation;
-        IVR_Scale          = t.IVR_Scale;
-        IVR_Timestamp      = t.IVR_Timestamp;
-        IVR_Buffer         = t.IVR_Buffer;
+
+        if (IVR_Buffer.total() > 0)IVR_Buffer = Mat();
+
+        IVR_Buffer         = t.IVR_Buffer.clone();
         return *this;
     }
 
     Mat toMat()
     {
-        return Mat(IVR_Height , IVR_Width, CV_8UC4 , IVR_Buffer.data());
+        //return Mat(IVR_Height , IVR_Width, CV_8UC4 , IVR_Buffer.data());
+        return IVR_Buffer.clone();
     }
 
+    //-----------------------------------------------------------------------
+    //LowLevel Data - Used by INS to Process data in the Low Level
+    //-----------------------------------------------------------------------
+    int        IVR_Width        ;//Width of the Image
+    int        IVR_Height       ;//Height of the Image
+    int        IVR_ColorChannels;//Collor Channels of the Image collected
+
+    Mat IVR_Buffer       ;//Image of the rendered buffer in Unreal
+}IVR_RenderBuffer;
+
+typedef class IVRLOWLEVELSDK_EXPORT IVR_FrameData
+{
+public:
+    IVR_FrameData()
+    {
+        IVR_IsValid        =false;
+        IVR_CameraName     = "";
+        IVR_CameraType     = IVR_CamType_Component;
+        IVR_CameraID       = 0;
+        IVR_FrameID        = 0;
+        IVR_FrameFPS       = 0;
+        IVR_FrameDT        = 0;
+        IVR_Timestamp      = 0;
+    }
+
+    IVR_FrameData( const IVR_FrameData & copy )
+    {
+        IVR_IsValid        = copy.IVR_IsValid;
+        IVR_CameraName     = copy.IVR_CameraName;
+        IVR_CameraType     = copy.IVR_CameraType;
+        IVR_CameraID       = copy.IVR_CameraID;
+        IVR_FrameID        = copy.IVR_FrameID;
+        IVR_FrameFPS       = copy.IVR_FrameFPS;
+        IVR_FrameDT        = copy.IVR_FrameDT;
+        IVR_Timestamp      = copy.IVR_Timestamp;
+    }
+
+    IVR_FrameData& operator = (const IVR_FrameData &t)
+    {
+        IVR_IsValid        = t.IVR_IsValid;
+        IVR_CameraName     = t.IVR_CameraName;
+        IVR_CameraType     = t.IVR_CameraType;
+        IVR_CameraID       = t.IVR_CameraID;
+        IVR_FrameID        = t.IVR_FrameID;
+        IVR_FrameFPS       = t.IVR_FrameFPS;
+        IVR_FrameDT        = t.IVR_FrameDT;
+        IVR_Timestamp      = t.IVR_Timestamp;
+
+        return *this;
+    }
 
     //-----------------------------------------------------------------------
     //Consumer Data - Used by Consumer to inform important data to Low Level
@@ -79,19 +123,13 @@ public:
     //-----------------------------------------------------------------------
     //LowLevel Data - Used by INS to Process data in the Low Level
     //-----------------------------------------------------------------------
-    int        IVR_Width        ;//Width of the Image
-    int        IVR_Height       ;//Height of the Image
-    int        IVR_ColorChannels;//Collor Channels of the Image collected
-    int        IVR_CameraID     ;//Camera Low Level Index
-    int        IVR_FrameID      ;//Frame  Low Level index (filled when Frame was recorded into Virtual Cam)
-    float      IVR_FrameFPS     ;//Frame FPS
+    uint       IVR_CameraID     ;//Camera Low Level Index
+    uint       IVR_FrameID      ;//Frame  Low Level index (filled when Frame was recorded into Virtual Cam)
+    uint       IVR_FrameFPS     ;//Frame FPS
     float      IVR_FrameDT      ;//Frame Delta Time
-    QVector3D  IVR_Position     ;//Position of the Camera
-    QVector3D  IVR_Rotation     ;//Rotation of the Camera
-    QVector3D  IVR_Scale        ;//Scale of the Camera
     qint64     IVR_Timestamp    ;//Timestamp of the frame collecting
-    QByteArray IVR_Buffer       ;//Image of the rendered buffer in Unreal
-}IVR_RenderBuffer;
+}IVR_FrameData;
+
 
 //This is the first set of features generated for the Machine Learning Process
 typedef struct IVRLOWLEVELSDK_EXPORT IVR_Features

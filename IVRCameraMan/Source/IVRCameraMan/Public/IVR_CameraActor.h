@@ -33,7 +33,7 @@ public:
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
 	void IVR_StopRecord(bool IVR_AutoRecord=true);
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
-	void IVR_CustomTick(float DeltaTime);
+	void IVR_CustomTick();
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
 	bool IVR_SetTransform(FTransform pTransform);
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
@@ -44,9 +44,9 @@ public:
 
 	FCriticalSection          IVR_UpdCamSection;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "CameraMan|Objects|IVR_CameraActor")
 	UIVR_CameraComponent* IVR_ActorCam;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "CameraMan|Objects|IVR_CameraActor")
 	USceneComponent*      IVR_Root;
 
 };

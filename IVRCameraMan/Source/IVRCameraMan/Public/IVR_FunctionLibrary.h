@@ -144,6 +144,7 @@ public:
 		const FString SessionConfigFilePath = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / "Config" / "IVRCameraMan" / "DefaultCameraMan.ini");
 		const FString SessionConfigPath     = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / "Config" / "IVRCameraMan" );
 		FString IVR_RecordingPath;
+		FString IVR_VideoResolution;
 		FString IVR_DebugFlag;
 		FString IVR_MSecs;
 		QString pPath;
@@ -174,6 +175,29 @@ public:
 				
 				pIVR_LowLevelInterface->IVR_SetRootPath(Root);
 				pIVR_LowLevelInterface->IVR_SetConfPath(Config);
+			}
+
+			if (pIVR_ProjectConfigFile.GetString(SectionName, TEXT("VideoResolution"), IVR_VideoResolution) == false)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Could not load [%s] VideoResolution"), SectionName);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("%s"), *(IVR_VideoResolution));
+				
+				int IVR_Width =0;
+				int IVR_Height=0;
+				
+				if (IVR_VideoResolution == "SD (Standard Definition)") { IVR_Width = 640; IVR_Height = 480; }
+				if (IVR_VideoResolution == "HD (High Definition)") { IVR_Width = 1280; IVR_Height = 720; }
+				if (IVR_VideoResolution == "Full HD (FHD)") { IVR_Width = 1920; IVR_Height = 1080; }
+				if (IVR_VideoResolution == "QHD (Quad HD)") { IVR_Width = 2560; IVR_Height = 1440; }
+				if (IVR_VideoResolution == "2K video") { IVR_Width = 2048; IVR_Height = 1080; }
+				if (IVR_VideoResolution == "4K video or Ultra HD (UHD)") { IVR_Width = 3840; IVR_Height = 2160; }
+				if (IVR_VideoResolution == "8K video or Full Ultra HD") { IVR_Width = 7680; IVR_Height = 4320; }
+
+				pIVR_LowLevelInterface->IVR_SetResolution(IVR_Width, IVR_Height);
+				
 			}
 
 			if (pIVR_ProjectConfigFile.GetString(SectionName, TEXT("DebugRendering"), IVR_DebugFlag) == false)

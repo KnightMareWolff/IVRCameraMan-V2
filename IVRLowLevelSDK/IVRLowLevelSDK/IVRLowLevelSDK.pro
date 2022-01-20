@@ -25,7 +25,6 @@ SOURCES += \
     IVR_ImageReader.cpp \
     IVR_LauncherUI.cpp \
     IVR_LowLevelSDK.cpp \
-    IVR_TaskQueue.cpp \
     IVR_VideoReader.cpp \
     IVR_VirtualCamera.cpp
 
@@ -43,8 +42,8 @@ HEADERS += \
     IVR_ImageFilter.h \
     IVR_ImageReader.h \
     IVR_LauncherUI.h \
+    IVR_LockFreeQueue.h \
     IVR_LowLevelSDK.h \
-    IVR_TaskQueue.h \
     IVR_VideoReader.h \
     IVR_VirtualCamera.h
 

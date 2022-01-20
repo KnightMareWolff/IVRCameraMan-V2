@@ -27,6 +27,7 @@
 #include "QtGui/qvector3d.h"
 #include "QtGui/qimage.h"
 #include "QtCore/qfile.h"
+#include "QtCore/qdatastream.h"
 #include "QtWidgets/qfiledialog.h"
 #include "QtCore/qfuture.h"
 #include "QtConcurrent/QtConcurrent"
@@ -35,6 +36,10 @@
 #include <string>
 #include <mutex>
 #include <condition_variable>
+#include <stdio.h>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 #include "opencv2/core.hpp"
 #include "opencv2/core/base.hpp"
@@ -56,12 +61,16 @@ using namespace QtConcurrent;
 class IVRLOWLEVELSDK_EXPORT CIVRConfig
 {
 public:
-    CIVRConfig(bool bOpenOfflineThread);
     CIVRConfig(                       );
 
-    static QApplication*  IVR_QtApp;
-    static bool           IVR_GUIActive;
-    QFuture<void>         IVR_Thread;
+    //Configuration Folders
+    static QString IVR_RootFolder        ;
+    static QString IVR_ConfigFolder      ;
+    static bool    IVR_DebbugMode        ;
+    static uint    IVR_MSecToWait        ;
+    static int     IVR_Width             ;
+    static int     IVR_Height            ;
+    static const size_t  IVR_GQueueSize  ;
 };
 
 #endif // CIVRCONFIG_H

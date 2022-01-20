@@ -27,6 +27,8 @@ AIVR_CameraTrigger::AIVR_CameraTrigger()
 	IVR_TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &AIVR_CameraTrigger::OnOverlapBegin);
 	IVR_TriggerVolume->OnComponentEndOverlap.AddDynamic(this, &AIVR_CameraTrigger::OnOverlapEnd);
 
+    IVR_Overlapping = false;
+
 }
 
 // Called when the game starts or when spawned
@@ -34,7 +36,6 @@ void AIVR_CameraTrigger::BeginPlay()
 {
 	Super::BeginPlay();
 
-	IVR_Overlapping = false;
 	//Draw Debbug box, only if enabled by the Director
 	if (UIVR_FunctionLibrary::pIVR_DrawDebbug)DrawDebugBox(GetWorld(), GetActorLocation(), GetComponentsBoundingBox().GetExtent(), FColor::Turquoise, true, -1, 0, 5);
 	
@@ -50,18 +51,16 @@ void AIVR_CameraTrigger::Tick(float DeltaTime)
 void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	
+    if (IVR_TargetActorIn == nullptr)return;
+
+    if (IVR_Overlapping)return;
+
     // check if Actors do not equal nullptr and that 
     if (OtherActor && (OtherActor != this) && OtherActor->GetClass() == AIVR_CameraActor::StaticClass())
     {
-        //Avoid to check again when we are already overlaping something...
-        //In future will be used to stack overlapings.
-        if (IVR_Overlapping)return;
-
         UE_LOG(LogTemp, Warning, TEXT("IVR TriggerBox Activated"));
-        //Indicates we are overlapping
+        
         IVR_Overlapping = true;
-
-        AIVR_CameraActor* pTypedActor = (AIVR_CameraActor*)OtherActor;
 
         switch (IVR_TriggerActionIn)
         {
@@ -76,7 +75,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                 if (pActorCam->GetClass() == AIVR_CameraActor::StaticClass() ||
                     pActorCam->GetClass()->GetSuperClass() == AIVR_CameraActor::StaticClass())
                 {
-                    if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StartRecord();
+                    AsyncTask(ENamedThreads::GameThread, [this,pActorCam]()
+                    {
+                        if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StartRecord();
+                    });
                 }
             }break;
             case ECameraType::OnRail:
@@ -87,7 +89,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                     pRailCam->GetClass()->GetSuperClass() == AIVR_OnRailCamera::StaticClass())
                 {
                     //If the system Cannot Cast, a wrong type was informed...
-                    if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StartRail();
+                    AsyncTask(ENamedThreads::GameThread, [this,pRailCam]()
+                    {
+                        if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StartRail();
+                    });
                 }
             }break;
             case ECameraType::OnCrane:
@@ -97,7 +102,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                 if (pCraneCam->GetClass() == AIVR_OnCraneCamera::StaticClass() ||
                     pCraneCam->GetClass()->GetSuperClass() == AIVR_OnCraneCamera::StaticClass())
                 {
-                    if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StartCrane();
+                    AsyncTask(ENamedThreads::GameThread, [this,pCraneCam]()
+                    {
+                        if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StartCrane();
+                    });
                 }
             }break;
             case ECameraType::Watching:
@@ -113,7 +121,7 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
         }break;
         case EActionType::Block:
         {
-            switch (IVR_OutType)
+            switch (IVR_InType)
             {
             case ECameraType::CameraActor:
             {
@@ -122,7 +130,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                 if (pActorCam->GetClass() == AIVR_CameraActor::StaticClass() ||
                     pActorCam->GetClass()->GetSuperClass() == AIVR_CameraActor::StaticClass())
                 {
-                    if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StopRecord();
+                    AsyncTask(ENamedThreads::GameThread, [this,pActorCam]()
+                    {
+                        if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StopRecord();
+                    });
                 }
 
             }break;
@@ -133,7 +144,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                 if (pRailCam->GetClass() == AIVR_OnRailCamera::StaticClass() ||
                     pRailCam->GetClass()->GetSuperClass() == AIVR_OnRailCamera::StaticClass())
                 {
-                    if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StopRail();
+                    AsyncTask(ENamedThreads::GameThread, [this, pRailCam]()
+                    {
+                        if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StopRail();
+                    });
                 }
 
             }break;
@@ -144,7 +158,10 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
                 if (pCraneCam->GetClass() == AIVR_OnCraneCamera::StaticClass() ||
                     pCraneCam->GetClass()->GetSuperClass() == AIVR_OnCraneCamera::StaticClass())
                 {
-                    if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StopCrane();
+                    AsyncTask(ENamedThreads::GameThread, [this,pCraneCam]()
+                    {
+                        if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StopCrane();
+                    });
                 }
 
 
@@ -165,14 +182,15 @@ void AIVR_CameraTrigger::OnOverlapBegin(class UPrimitiveComponent* newComp, clas
 
 void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+    //Warning! This must happen before the object comparison to avoid stuck the trigger
+    IVR_Overlapping = false;
+
+    //If we not have a target object...
+    if (IVR_TargetActorOut == nullptr)return;
+
 	if (OtherActor && (OtherActor != this) && OtherActor->GetClass() == AIVR_CameraActor::StaticClass())
     {
-        //We cannot finish something not happening anymore...
-        if (!IVR_Overlapping)return;
-
         UE_LOG(LogTemp, Warning, TEXT("IVR TriggerBox De-Activated"));
-
-        AIVR_CameraActor* pTypedActor = (AIVR_CameraActor*)OtherActor;
 
         switch (IVR_TriggerActionOut)
         {
@@ -187,7 +205,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pActorCam->GetClass() == AIVR_CameraActor::StaticClass() ||
                     pActorCam->GetClass()->GetSuperClass() == AIVR_CameraActor::StaticClass())
                 {
-                    if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StartRecord();
+                    AsyncTask(ENamedThreads::GameThread, [this,pActorCam]()
+                    {
+                        if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StartRecord();
+                    });
                 }
 
             }break;
@@ -198,7 +219,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pRailCam->GetClass() == AIVR_OnRailCamera::StaticClass() ||
                     pRailCam->GetClass()->GetSuperClass() == AIVR_OnRailCamera::StaticClass())
                 {
-                    if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StartRail();
+                    AsyncTask(ENamedThreads::GameThread, [this,pRailCam]()
+                    {
+                        if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StartRail();
+                    });
                 }
 
             }break;
@@ -209,7 +233,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pCraneCam->GetClass() == AIVR_OnCraneCamera::StaticClass() ||
                     pCraneCam->GetClass()->GetSuperClass() == AIVR_OnCraneCamera::StaticClass())
                 {
-                    if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StartCrane();
+                    AsyncTask(ENamedThreads::GameThread, [this,pCraneCam]()
+                    {
+                        if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StartCrane();
+                    });
                 }
 
             }break;
@@ -235,7 +262,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pActorCam->GetClass() == AIVR_CameraActor::StaticClass() ||
                     pActorCam->GetClass()->GetSuperClass() == AIVR_CameraActor::StaticClass())
                 {
-                    if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StopRecord();
+                    AsyncTask(ENamedThreads::GameThread, [this,pActorCam]()
+                    {
+                        if (pActorCam && (pActorCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnActor))pActorCam->IVR_StopRecord();
+                    });
                 }
 
             }break;
@@ -246,7 +276,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pRailCam->GetClass() == AIVR_OnRailCamera::StaticClass() ||
                     pRailCam->GetClass()->GetSuperClass() == AIVR_OnRailCamera::StaticClass())
                 {
-                    if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StopRail();
+                    AsyncTask(ENamedThreads::GameThread, [this, pRailCam]()
+                    {
+                        if (pRailCam && (pRailCam->IVR_RailCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnRail))pRailCam->IVR_StopRail();
+                    });
                 }
 
             }break;
@@ -257,7 +290,10 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
                 if (pCraneCam->GetClass() == AIVR_OnCraneCamera::StaticClass() ||
                     pCraneCam->GetClass()->GetSuperClass() == AIVR_OnCraneCamera::StaticClass())
                 {
-                    if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StopCrane();
+                    AsyncTask(ENamedThreads::GameThread, [this,pCraneCam]()
+                    {
+                        if (pCraneCam && (pCraneCam->IVR_CraneCam->IVR_ActorCam->IVR_LowLevelType == IVR_CamType_OnCrane))pCraneCam->IVR_StopCrane();
+                    });
                 }
 
             }break;
@@ -272,10 +308,6 @@ void AIVR_CameraTrigger::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
             }
         }break;
         }
-
-        //Avoid to check again when we are aready overlaping something...
-        //In future will be used to stack overlapings.
-        if (IVR_Overlapping)IVR_Overlapping = false;
     }
 }
 
