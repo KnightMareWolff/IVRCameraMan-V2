@@ -11,8 +11,6 @@ Taking into account this evolution occurring in virtual production environments,
 
 The name “Camera Man” was inspired in recording operations commanded by a Character that takes possession of the Player, just like in a Real Time Game!
 
-https://www.youtube.com/embed/VjL4qE5WuLc
-
 The entire Plugin was developed in C ++ and the functionalities can be easily used in Blueprints, where instead of just specifying usage parameters, all the Plugin's usability was created to meet some "Use Cases", commonly used for recording videos.
 
 &nbsp;
