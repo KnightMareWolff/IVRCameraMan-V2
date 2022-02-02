@@ -236,6 +236,13 @@ bool UIVR_CameraComponent::IVR_StartRecord()
 		return false;
 	}
 
+	if (!IVR_LowLevelCam)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("You are using a valid Cam But...Not register it at Low Level System."), true, FVector2D(1.5, 1.5));
+		return false;
+	}
+
 	//Fire-Up the LowLevel Render Queue
 	IVR_LowLevelCam->IVR_StartRecord();
 	// Time when the press play...

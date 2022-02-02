@@ -10,9 +10,11 @@
 	"DocsURL": "http://insaneframework.com/ivr-camera-man/",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/099c0fd27b6e434db3adfaec71a2b82c",
 	"SupportURL": "http://insaneframework.com/ivr-camera-man/",
-	"EngineVersion": "4.27.0",
+  "EngineVersion": "4.27.0",
 	"CanContainContent": true,
-	"Installed": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
 	"Modules": [
 		{
 			"Name": "IVRCameraMan",

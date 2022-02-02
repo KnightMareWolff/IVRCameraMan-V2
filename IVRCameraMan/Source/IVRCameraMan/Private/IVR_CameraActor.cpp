@@ -18,10 +18,46 @@ AIVR_CameraActor::AIVR_CameraActor()
 
 	IVR_ActorCam = CreateDefaultSubobject<UIVR_CameraComponent>(TEXT("ActorCam"));
 	IVR_ActorCam->AttachToComponent(IVR_Root, FAttachmentTransformRules::KeepRelativeTransform, FName(TEXT("ActorCameraMan")));
-
+	IVR_ActorCam->IVR_LowLevelType = IVR_CamType_OnActor;
 	IVR_MoveCamera = false;
 	IVR_SelfRegistered = false;
 
+}
+
+void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, ECameraType LowLevelType, ERecordingMode LowLevelRecordingMode)
+{
+	if (IVR_ActorCam != nullptr)
+	{
+		int32 LwTp = IVR_CamType_OnActor;
+		int32 LwRm = IVR_Recording_Mode_Average;
+
+		switch (LowLevelType)
+		{
+		case ECameraType::CameraActor: {LwTp = IVR_CamType_OnActor; }break;
+		case ECameraType::OnCrane    : {LwTp = IVR_CamType_OnCrane; }break;
+		case ECameraType::OnRail     : {LwTp = IVR_CamType_OnRail ; }break;
+		case ECameraType::Watching   : {return;}break;
+		case ECameraType::None       : {return;}break;
+		default: {return; }break;
+		}
+
+		switch (LowLevelRecordingMode)
+		{
+		case ERecordingMode::AveragedFPS     : {LwRm = IVR_Recording_Mode_Average; }break;
+		case ERecordingMode::BestFPS         : {LwRm = IVR_Recording_Mode_Best; }break;
+		case ERecordingMode::TimeAproximation: {LwRm = IVR_Recording_Mode_TimeAprox; }break;
+		case ERecordingMode::DesiredFPS: {return; }break;
+		case ERecordingMode::Stabilised: {return; }break;
+		case ERecordingMode::SuperRes  : {return; }break;
+		default: {return; }break;
+		}
+
+		FString CamName = CameraName + FString::FromInt(UIVR_FunctionLibrary::IVR_GetCameraCounter(LwTp));
+
+		IVR_ActorCam->IVR_RegisterCamera(CamName, LwTp , LwRm);
+
+		IVR_SelfRegistered = true;
+	}
 }
 
 void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode)
