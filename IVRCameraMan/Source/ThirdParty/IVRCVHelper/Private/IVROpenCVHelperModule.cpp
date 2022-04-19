@@ -21,12 +21,27 @@ public:
 	virtual void ShutdownModule() override;
 
 private:
+
+	//OpenCV handler
 	void* OpenCvDllHandle;
+
+	//IVR Low Level SDK handler
 	void* OpenLvDllHandle;
+
+	//Qt handlers
 	void* OpenQ1DllHandle;
 	void* OpenQ2DllHandle;
 	void* OpenQ3DllHandle;
 	void* OpenQ4DllHandle;
+
+	//ffmpeg handlers
+	void* OpenF1DllHandle;
+	void* OpenF2DllHandle;
+	void* OpenF3DllHandle;
+	void* OpenF4DllHandle;
+	void* OpenF5DllHandle;
+	void* OpenF6DllHandle;
+	void* OpenF7DllHandle;
 };
 
 FIVRCVHelperModule::FIVRCVHelperModule()
@@ -45,6 +60,14 @@ void FIVRCVHelperModule::StartupModule()
 	const FString DQ2Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(OPENQ2_DLL_NAME));
 	const FString DQ3Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(OPENQ3_DLL_NAME));
 	const FString DQ4Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(OPENQ4_DLL_NAME));
+
+	const FString DF1Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF1_DLL_NAME));
+	const FString DF2Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF2_DLL_NAME));
+	const FString DF3Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF3_DLL_NAME));
+	const FString DF4Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF4_DLL_NAME));
+	const FString DF5Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF5_DLL_NAME));
+	const FString DF6Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF6_DLL_NAME));
+	const FString DF7Path = OpenCvBinPath / TEXT(PREPROCESSOR_TO_STRING(FPEGF7_DLL_NAME));
 
 	FPlatformProcess::PushDllDirectory(*OpenCvBinPath);
 	OpenCvDllHandle = FPlatformProcess::GetDllHandle(*DLLPath);
@@ -117,6 +140,90 @@ void FIVRCVHelperModule::StartupModule()
 	else
 	{
 		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Qt Concurrent Load Error")));
+	}
+
+	OpenF1DllHandle = FPlatformProcess::GetDllHandle(*DF1Path);
+
+	if (OpenF1DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 01 Load Error")));
+	}
+
+	OpenF2DllHandle = FPlatformProcess::GetDllHandle(*DF2Path);
+
+	if (OpenF2DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 02 Load Error")));
+	}
+
+	OpenF3DllHandle = FPlatformProcess::GetDllHandle(*DF3Path);
+
+	if (OpenF3DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 03 Load Error")));
+	}
+
+	OpenF4DllHandle = FPlatformProcess::GetDllHandle(*DF4Path);
+
+	if (OpenF4DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 04 Load Error")));
+	}
+
+	OpenF5DllHandle = FPlatformProcess::GetDllHandle(*DF5Path);
+
+	if (OpenF5DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 05 Load Error")));
+	}
+
+	OpenF6DllHandle = FPlatformProcess::GetDllHandle(*DF6Path);
+
+	if (OpenF6DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 06 Load Error")));
+	}
+
+	OpenF7DllHandle = FPlatformProcess::GetDllHandle(*DF7Path);
+
+	if (OpenF7DllHandle)
+	{
+		// Call the test function in the third party library that opens a message box
+		//FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Load OpenCV Properly")));
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("ffmpeg 07 Load Error")));
 	}
 
 	FPlatformProcess::PopDllDirectory(*OpenCvBinPath);

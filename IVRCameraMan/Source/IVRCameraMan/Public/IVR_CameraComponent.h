@@ -15,7 +15,7 @@
 #include "AudioCaptureComponent.h"
 #include "AudioMixerBlueprintLibrary.h"
 #include "IVR_FunctionLibrary.h" //The Function Library already have the OpenCV Includes
-
+#include "Framework/Application/SlateApplication.h"
 #include "IVR_CameraComponent.generated.h"
 
 
@@ -93,7 +93,7 @@ public:
 	CIVRVirtualCamera*        IVR_LowLevelCam;
 
 	//Time Measuring
-	float      IVR_StartTime;
+	float      IVR_ComponentStartTime;
 	
 	//-----------------------------------------------
 	//Render Capture Attributes
@@ -112,10 +112,9 @@ public:
 	FCriticalSection          IVR_UpdCamSection;
 	FCriticalSection          IVR_RecCamSection;
 
-	TArray<FColor>   IVR_RawBuffer;
 	IVR_RenderBuffer IVR_FrameBuffer;
 	IVR_FrameData    IVR_FrameInformation;
-	
+	TArray<FColor>   IVR_RawBuffer;
 	//-----------------------------------------------
 	//Render Capture Functions
 	//-----------------------------------------------

@@ -1,8 +1,8 @@
 
 TEMPLATE = lib
 DEFINES += IVRLOWLEVELSDK_LIBRARY
-
-CONFIG += c++11
+DEFINES += _CRT_SECURE_NO_WARNINGS
+CONFIG  += c++11
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -25,6 +25,7 @@ SOURCES += \
     IVR_ImageReader.cpp \
     IVR_LauncherUI.cpp \
     IVR_LowLevelSDK.cpp \
+    IVR_MediaHandler.cpp \
     IVR_VideoReader.cpp \
     IVR_VirtualCamera.cpp
 
@@ -44,6 +45,7 @@ HEADERS += \
     IVR_LauncherUI.h \
     IVR_LockFreeQueue.h \
     IVR_LowLevelSDK.h \
+    IVR_MediaHandler.h \
     IVR_VideoReader.h \
     IVR_VirtualCamera.h
 
@@ -82,5 +84,19 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libs/Qt/vc16/ -lQt5Conc
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libs/Qt/vc16/ -lQt5Concurrentd
 else:unix: LIBS += -L$$PWD/../libs/Qt/vc16/ -lQt5Concurrent
 
+#FFMPEG API
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lavcodec
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lavutil
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lavdevice
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lavfilter
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lavformat
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lswresample
+win32: LIBS += -L$$PWD/../libs/ffmpeg/lib/ -lswscale
+
+INCLUDEPATH += $$PWD/../libs/ffmpeg/include
+DEPENDPATH += $$PWD/../libs/ffmpeg/include
+
 QT += widgets
+
+
 

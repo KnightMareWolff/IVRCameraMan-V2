@@ -1,0 +1,197 @@
+Package: ffmpeg
+Version: 4.4.1
+Port-Version: 10
+Depends: vcpkg-cmake:x64-windows, vcpkg-pkgconfig-get-modules:x64-windows
+Architecture: x64-windows-rel
+Multi-Arch: same
+Abi: d6d7930c3014c741dac3ca6c1422d42577f8b9b3d60b3cc75fbd4d2633937587
+Description: a library to decode, encode, transcode, mux, demux, stream, filter and play pretty much anything that humans and machines have created.
+    FFmpeg is the leading multimedia framework, able to decode, encode, transcode, mux, demux, stream, filter and play pretty much anything that humans and machines have created. It supports the most obscure ancient formats up to the cutting edge. No matter if they were designed by some standards committee, the community or a corporation. It is also highly portable: FFmpeg compiles, runs, and passes our testing infrastructure FATE across Linux, Mac OS X, Microsoft Windows, the BSDs, Solaris, etc. under a wide variety of build environments, machine architectures, and configurations.
+Type: Port
+Default-Features: avcodec, avdevice, avfilter, avformat, swresample, swscale
+
+Package: ffmpeg
+Feature: aom
+Depends: aom
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: AV1 video encoding/decoding via libaom support in ffmpeg
+Type: Port
+
+Package: ffmpeg
+Feature: ass
+Depends: libass
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Libass subtitles rendering, needed for subtitles and ass filter support in ffmpeg
+Type: Port
+
+Package: ffmpeg
+Feature: avcodec
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the avcodec library
+Type: Port
+
+Package: ffmpeg
+Feature: avdevice
+Depends: ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the avdevice library
+Type: Port
+
+Package: ffmpeg
+Feature: avfilter
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the avfilter library
+Type: Port
+
+Package: ffmpeg
+Feature: avformat
+Depends: ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the avformat library
+Type: Port
+
+Package: ffmpeg
+Feature: avisynthplus
+Depends: avisynthplus, ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Reading of AviSynth script files
+Type: Port
+
+Package: ffmpeg
+Feature: dav1d
+Depends: dav1d
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: AV1 decoding via libdav1d
+Type: Port
+
+Package: ffmpeg
+Feature: fdk-aac
+Depends: fdk-aac, ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: AAC de/encoding via libfdk-aac, **including GPL-incompatible patent-encumbered HE-AAC**. If you do not require HE-AAC, use the built-in FFmpeg AAC codec.
+Type: Port
+
+Package: ffmpeg
+Feature: ffmpeg
+Depends: ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the ffmpeg application
+Type: Port
+
+Package: ffmpeg
+Feature: ffplay
+Depends: ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the ffplay application
+Type: Port
+
+Package: ffmpeg
+Feature: ffprobe
+Depends: ffmpeg
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the ffprobe application
+Type: Port
+
+Package: ffmpeg
+Feature: gpl
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Allow use of GPL code, the resulting libs and binaries will be under GPL
+Type: Port
+
+Package: ffmpeg
+Feature: mp3lame
+Depends: mp3lame
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: MP3 encoding via libmp3lame
+Type: Port
+
+Package: ffmpeg
+Feature: nonfree
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Allow use of nonfree code, the resulting libs and binaries will be unredistributable
+Type: Port
+
+Package: ffmpeg
+Feature: openh264
+Depends: openh264
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: H.264 de/encoding via openh264
+Type: Port
+
+Package: ffmpeg
+Feature: sdl2
+Depends: sdl2
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Sdl2 support
+Type: Port
+
+Package: ffmpeg
+Feature: soxr
+Depends: ffmpeg, soxr
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Include libsoxr resampling
+Type: Port
+
+Package: ffmpeg
+Feature: swresample
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the swresample library
+Type: Port
+
+Package: ffmpeg
+Feature: swscale
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Build the swscale library
+Type: Port
+
+Package: ffmpeg
+Feature: vorbis
+Depends: libvorbis
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: Vorbis en/decoding via libvorbis, native implementation exists
+Type: Port
+
+Package: ffmpeg
+Feature: vpx
+Depends: libvpx
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: VP8 and VP9 de/encoding via libvpx
+Type: Port
+
+Package: ffmpeg
+Feature: x264
+Depends: ffmpeg, x264
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: H.264 encoding via x264
+Type: Port
+
+Package: ffmpeg
+Feature: x265
+Depends: ffmpeg, x265
+Architecture: x64-windows-rel
+Multi-Arch: same
+Description: HEVC encoding via x265
+Type: Port

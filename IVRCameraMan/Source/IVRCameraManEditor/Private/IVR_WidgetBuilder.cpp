@@ -29,11 +29,19 @@ void UIVR_WidgetBuilder::BuildWidget()
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FIVR_PropertyCustomizer::MakeInstance));
 	
 	PropertyModule.NotifyCustomizationModuleChanged();
-
-	//Fill the Default Parameters View Args
-	FDetailsViewArgs DefaultDetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, false, GUnrealEd);
-	//DefaultDetailsViewArgs.bShowActorLabel = false;
 	
+	//Fill the Default Parameters View Args
+	//FDetailsViewArgs DefaultDetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, false, GUnrealEd);
+	//DefaultDetailsViewArgs.bShowActorLabel = false;
+	FDetailsViewArgs DefaultDetailsViewArgs;
+	
+	DefaultDetailsViewArgs.bUpdatesFromSelection = false;
+	DefaultDetailsViewArgs.bLockable             = false;
+	DefaultDetailsViewArgs.bAllowSearch          = true;
+	DefaultDetailsViewArgs.NameAreaSettings      = FDetailsViewArgs::HideNameArea;
+	DefaultDetailsViewArgs.bHideSelectionTip     = false;
+	DefaultDetailsViewArgs.NotifyHook            = GUnrealEd;
+
 	// create the detail view widget
 	pWidgetView     = PropertyModule.CreateDetailView(DefaultDetailsViewArgs);
 
@@ -45,8 +53,16 @@ void UIVR_WidgetBuilder::BuildWidget()
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FIVR_SuperPropertyCustomizer::MakeInstance));
 	
 	//Fill the Experimental Parameters View Args
-	FDetailsViewArgs SuperDetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, false, GUnrealEd);
+	//FDetailsViewArgs SuperDetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, false, GUnrealEd);
 	//SuperDetailsViewArgs.bShowActorLabel = false;
+	FDetailsViewArgs SuperDetailsViewArgs;
+
+	SuperDetailsViewArgs.bUpdatesFromSelection = false;
+	SuperDetailsViewArgs.bLockable = false;
+	SuperDetailsViewArgs.bAllowSearch = true;
+	SuperDetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+	SuperDetailsViewArgs.bHideSelectionTip = false;
+	SuperDetailsViewArgs.NotifyHook = GUnrealEd;
 
 	// create the Experimental View
 	pSuperResWidget = PropertyModule.CreateDetailView(SuperDetailsViewArgs);

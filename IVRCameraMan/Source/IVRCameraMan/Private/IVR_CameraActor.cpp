@@ -96,6 +96,7 @@ void AIVR_CameraActor::IVR_StopRecord(bool IVR_AutoRecord)
 {
 	if (IVR_MoveCamera)
 	{
+		
 		if (IVR_ActorCam->IVR_StopRecord())
 		{
 			IVR_MoveCamera = false;

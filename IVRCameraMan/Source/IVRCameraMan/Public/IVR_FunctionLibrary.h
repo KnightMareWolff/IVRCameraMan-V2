@@ -6,7 +6,7 @@
 /************************************************************************/
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Kismet/KismetInputLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -49,36 +49,35 @@ using namespace cv::videostab;
 using namespace cv::xfeatures2d;
 using namespace cv::ml;
 
-
 UENUM(BlueprintType)
 enum class EActionType : uint8
 {
 	Stimulate = 0 UMETA(DisplayName = "Stimulate"),
-	Block = 1 UMETA(DisplayName = "Block"),
-	Focus = 2 UMETA(DisplayName = "Focus"),
-	Tracking = 3 UMETA(DisplayName = "Tracking"),
-	None = 4 UMETA(DisplayName = "None")
+	Block     = 1 UMETA(DisplayName = "Block"),
+	Focus     = 2 UMETA(DisplayName = "Focus"),
+	Tracking  = 3 UMETA(DisplayName = "Tracking"),
+	None      = 4 UMETA(DisplayName = "None")
 };
 
 UENUM(BlueprintType)
 enum class ECameraType : uint8
 {
 	CameraActor = 0 UMETA(DisplayName = "Camera Actor"),
-	OnRail = 1 UMETA(DisplayName = "OnRail Camera"),
-	OnCrane = 2 UMETA(DisplayName = "OnCrane Camera"),
-	Watching = 3 UMETA(DisplayName = "Watching Camera"),
-	None = 4 UMETA(DisplayName = "None")
+	OnRail      = 1 UMETA(DisplayName = "OnRail Camera"),
+	OnCrane     = 2 UMETA(DisplayName = "OnCrane Camera"),
+	Watching    = 3 UMETA(DisplayName = "Watching Camera"),
+	None        = 4 UMETA(DisplayName = "None")
 };
 
 UENUM(BlueprintType)
 enum class ERecordingMode : uint8
 {
-	AveragedFPS      = 0   UMETA(DisplayName = "Record with Averaged FPS"),
-	BestFPS          = 1      UMETA(DisplayName = "Record with FPS Histogram"),
-	DesiredFPS       = 2   UMETA(DisplayName = "Record with Desired FPS"),
+	AveragedFPS      = 0 UMETA(DisplayName = "Record with Averaged FPS"),
+	BestFPS          = 1 UMETA(DisplayName = "Record with FPS Histogram"),
+	DesiredFPS       = 2 UMETA(DisplayName = "Record with Desired FPS"),
 	TimeAproximation = 3 UMETA(DisplayName = "Record with Time Aproximation"),
 	Stabilised       = 4 UMETA(DisplayName = "Stabilize the Video after Record"),
-	SuperRes         = 5  UMETA(DisplayName = "SuperRes the Video after Record")
+	SuperRes         = 5 UMETA(DisplayName = "SuperRes the Video after Record")
 };
 
 /**
@@ -91,14 +90,88 @@ class IVRCAMERAMAN_API UIVR_FunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
 
+	
+
 	/**
-	* This is how we are informing all the cameras the state they must follow (Start Record-0 , StopRecord-1 , Iddle-2).
+	* Support Function to Concatenate two Video files in a output video.
+	*
+	* Example of Use:
+	*
+	* IVR_CatVideo("VideoInput01.mp4","VideoInput02.mp4","VideoOutput.mp4");
 	*/
 	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
-	static void IVR_SingleShotRecordingMessage(int pIVR_State)
+	static bool IVR_CatVideo(FString pIVR_VideoFPath01, FString pIVR_VideoFPath02, FString pIVR_OutputFullPath)
 	{
-		pIVR_GlobalRecording = pIVR_State;
-		return;
+		//Oops, you dont have a media handler initialized...hummm
+		if (!pIVR_MediaHandler)return false;
+
+		QString pVid01Name = QString(TCHAR_TO_UTF8(*pIVR_VideoFPath01));
+		QString pVid02Name = QString(TCHAR_TO_UTF8(*pIVR_VideoFPath02));
+		QString pOutName   = QString(TCHAR_TO_UTF8(*pIVR_OutputFullPath));
+
+		if (!pIVR_MediaHandler->IVR_CatMedia(pVid01Name, pVid02Name, pOutName))
+		{
+			//the low level system have problems to Concatenate the files...
+			return false;
+		}
+
+		//All Good, check it out your file. :)
+		return true;
+	}
+
+	/**
+	* Support Function to ReMux a Video(Good to convert video files in other formats).
+	* The list of sucessfull formats used with this function are:
+	* .mp4 | .vlc | .mkv | .mov | .mp2 / .mp3 | .wmv | .mpg
+	* 
+	* Example of Use:
+	* 
+	* IVR_ReMuxVideo("VideoInput.mp4","VideoOutput.mkv");
+	*/
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	static bool IVR_ReMuxVideo(FString pIVR_VideoFullPath, FString pIVR_OutputFullPath)
+	{
+		//Oops, you dont have a media handler initialized...hummm
+		if (!pIVR_MediaHandler)return false;
+
+		QString pVidName = QString(TCHAR_TO_UTF8(*pIVR_VideoFullPath));
+		QString pOutName = QString(TCHAR_TO_UTF8(*pIVR_OutputFullPath));
+
+		if (!pIVR_MediaHandler->IVR_RemuxMedia(pVidName, pOutName))
+		{
+			//the low level system have problems to ReMux the file...
+			return false;
+		}
+
+		//All Good, check it out your file. :)
+		return true;
+	}
+
+	/**
+	* Support Function to Mix a Take(Video without sound) and Insert the sound on it.
+	* 
+	* Example of use:
+	* 
+	* IVR_MuxVideo("VideoInput.mp4" ,"AudioInput.mp3","VideoOutput.mp4");
+	*/
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	static bool IVR_MuxVideo(FString pIVR_VideoFullPath, FString pIVR_AudioFullPath, FString pIVR_OutputFullPath)
+	{
+		//Oops, you dont have a media handler initialized...hummm
+		if (!pIVR_MediaHandler)return false;
+
+		QString pVidName = QString(TCHAR_TO_UTF8(*pIVR_VideoFullPath));
+		QString pAudName = QString(TCHAR_TO_UTF8(*pIVR_AudioFullPath));
+		QString pOutName = QString(TCHAR_TO_UTF8(*pIVR_OutputFullPath));
+
+		if (!pIVR_MediaHandler->IVR_MuxMedia(pVidName, pAudName, pOutName))
+		{
+			//the low level system have problems to Mux the file...
+			return false;
+		}
+
+		//All Good, check it out your file. :)
+		return true;
 	}
 
 	/**
@@ -122,7 +195,7 @@ public:
 	/**
 	* This function will clean up all the camera pool and prepare the scene for a new recording.
 	*/
-	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	UFUNCTION(Category = "CameraMan|Settings|Functions", BlueprintCallable)
 	static void IVR_ShutdownLowLevelSystem()
 	{
 		pIVR_LowLevelInterface->IVR_StopGUIThread();
@@ -232,8 +305,11 @@ public:
 		pIVR_LowLevelInterface->IVR_SetDebugMode(pIVR_DrawDebbug);
 		pIVR_LowLevelInterface->IVR_SetWaitRecord(pMSecToWait);
 		
+		if (pIVR_LowLevelActive)
+		{
+			pIVR_MediaHandler = new CIVRMediaHandler();
+		}
 		//pIVR_LowLevelInterface->IVR_SpawnStage();
-		
 	}
 
 	/**
@@ -255,18 +331,21 @@ public:
 	}
 	
 	//Global storage for the Video recording sessions
-	static int                                     pIVR_GlobalRecording;
-	static bool                                    pIVR_GlobalReset;
-	static bool                                    pIVR_DrawDebbug;
+	static int                    pIVR_GlobalRecording;
+	static bool                   pIVR_GlobalReset;
+	static bool                   pIVR_DrawDebbug;
 
-	static FCriticalSection                        pIVR_CriticalSection;
-	static FString                                 pIVR_FrameFilesPath;
+	static FCriticalSection       pIVR_CriticalSection;
+	static FString                pIVR_FrameFilesPath;
 
 	//Settings Attributes
-	static FConfigFile                             pIVR_ProjectConfigFile;
+	static FConfigFile            pIVR_ProjectConfigFile;
 
 	//Low Level SDK Attributes
-	static IVRLowLevelSDK*                         pIVR_LowLevelInterface;
-	static bool                                    pIVR_LowLevelActive;
-	
+	static IVRLowLevelSDK*        pIVR_LowLevelInterface;
+	static bool                   pIVR_LowLevelActive;
+
+	//Low Level Media Handle
+	static CIVRMediaHandler*      pIVR_MediaHandler;
+
 };

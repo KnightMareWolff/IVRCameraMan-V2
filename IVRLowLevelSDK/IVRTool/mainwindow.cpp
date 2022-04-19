@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     IVRLowLevelSDK* pInterf = new IVRLowLevelSDK();
 
+    /*
     uint CamId;
     uint CamType=0;
     QString pCamName = "Test";
@@ -67,10 +68,30 @@ MainWindow::MainWindow(QWidget *parent)
     auto p6 = IVR_CMRenderQueue.front();
     IVR_CMRenderQueue.pop();
 
-
-
     pInterf->IVR_SpawnStage();
     qWarning() << "Huhuuu!";
+
+    */
+
+    QString pInputVideoPath      ("media/TestVideo.mp4");
+    QString pInputAuxVideoPath   ("media/TestVideoAuxiliary.mp4");
+    QString pOutputVideoPath     ("media/TestVideoOut.mp4");
+    QString pOutputVideoMixedPath   ("media/TestVideoOutMixed.mp4");
+    QString pOutputVideoMixedAuxPath("media/TestVideoAuxMixed.mp4");
+    QString pRemuxedVideoPath    ("media/TestVideoOutRemuxed.mkv");
+    QString pConcatVideoPath    ("media/TestVideoOutConcatenated.mp4");
+
+    QString pInputSoundPath("media/amostra01.mp3");
+    QString pInputSecondarySoundPath("media/amostra02.mp3");
+    QString pOutputSoundPath("media/OutputSound.mp3");
+
+    CIVRMediaHandler* mediaHandler = new CIVRMediaHandler();
+
+    mediaHandler->IVR_MuxMedia(pInputVideoPath ,pInputSoundPath         ,pOutputVideoMixedPath);
+    mediaHandler->IVR_MuxMedia(pInputVideoPath ,pInputSecondarySoundPath,pOutputVideoMixedAuxPath);
+    //mediaHandler->IVR_RemuxMedia(pOutputVideoMixedPath,pRemuxedVideoPath);
+
+    mediaHandler->IVR_CatMedia(pInputVideoPath,pInputAuxVideoPath,pConcatVideoPath);
 }
 
 MainWindow::~MainWindow()

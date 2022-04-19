@@ -134,6 +134,9 @@ uint CIVRVirtualCamera::IVR_GetBestFPS()
 
     if (frameFile != NULL)
     {
+        qWarning() << "----------IVR-----------------------";
+        qWarning() << "Loading Frame Data                  ";
+        qWarning() << "----------IVR-----------------------";
         while(!enOfFile)
         {
            IVR_FrameData tFrame;
@@ -165,6 +168,9 @@ uint CIVRVirtualCamera::IVR_GetBestFPS()
     }
 
 
+    qWarning() << "----------IVR-----------------------";
+    qWarning() << "Computing Histogram                 ";
+    qWarning() << "----------IVR-----------------------";
     Mat fpsData( 1 , FrameIndex + 1 , CV_32F , &fpsFloatData[0]);
     Mat hist;
     int bins = 120;
@@ -474,8 +480,8 @@ bool CIVRVirtualCamera::IVR_StartRecord()
     if(!IVR_haveOpenTake)return false;
     if( IVR_IsCompiling )return false;
 
-    IVR_RenderQueue = new LockFreeQueue<IVR_RenderBuffer, 6720 >();
-    IVR_DataQueue   = new LockFreeQueue<IVR_FrameData   , 2880  >();
+    if(!IVR_RenderQueue)IVR_RenderQueue = new LockFreeQueue<IVR_RenderBuffer, 6720 >();
+    if(!IVR_DataQueue  )IVR_DataQueue   = new LockFreeQueue<IVR_FrameData   , 2880  >();
 
     if(!IVR_RenderQueue || !IVR_DataQueue)return false;
 
@@ -499,6 +505,16 @@ bool CIVRVirtualCamera::IVR_CompileTake()
 {
     QFuture<void> IVR_CPThread = QtConcurrent::run([this]()
     {
+        qWarning() << "----------IVR-------------";
+        qWarning() << "Starting Compile Take";
+        qWarning() << "----------IVR-------------";
+
+        //-------------------------------------------------------------------------
+        //Initial Recording Setup
+        //-------------------------------------------------------------------------
+        qWarning() << "----------IVR----------------";
+        qWarning() << "Waiting frame Queues be empty";
+        qWarning() << "----------IVR----------------";
         //Waits for the recording Threads Stop
         while(IVR_BFThread.isRunning());
         while(IVR_DTThread.isRunning());
@@ -516,34 +532,60 @@ bool CIVRVirtualCamera::IVR_CompileTake()
         //Open the Image file To record The Video Frame
         FILE *imageFile;
 
-        //-------------------------------------------------------------------------
-        //Initial Recording Setup
-        //-------------------------------------------------------------------------
+        qWarning() << "----------IVR-----------------------";
+        qWarning() << "Cleaning the Queues for a new record";
+        qWarning() << "----------IVR-----------------------";
+        //Free Up all the render queues since we dont know when we will start record again...
+        //---------------------------------------
+        //WARNING!
+        //It seems Unreal Improve the garbage collection feature!
+        //Now pointers inside of the dll are being garbage collected!
+        //This not happen in the previous versions...so now be carefull
+        //to set nullptr into LowLevel Pointers!
+        //---------------------------------------
+        if(IVR_RenderQueue && IVR_DataQueue)
+        {
+            delete IVR_RenderQueue;
+            delete IVR_DataQueue  ;
+            IVR_RenderQueue = new LockFreeQueue<IVR_RenderBuffer, 6720 >();
+            IVR_DataQueue   = new LockFreeQueue<IVR_FrameData   , 2880  >();
+        }
+
         //Block to receive more frames for this camera
         IVR_IsCompiling=true;
 
-        //Free Up all the render queues since we dont know when we will start record again...
-        delete IVR_RenderQueue;
-        delete IVR_DataQueue  ;
-        IVR_RenderQueue = nullptr;
-        IVR_DataQueue   = nullptr;
-
+        qWarning() << "----------IVR-----------------------";
+        qWarning() << "Setting Up Recording Paths          ";
+        qWarning() << "----------IVR-----------------------";
         IVR_VideoPath  = IVR_RootFolder + "/" + IVR_CameraName + "Take" + QString("%1").arg(IVR_ActualTake) + ".mp4";
         IVR_FrameFile  = IVR_RootFolder + "/" + IVR_CameraName + "Take" + QString("%1").arg(IVR_ActualTake) + ".iff";
 
         IVR_Takes[IVR_ActualTake].IVR_VideoTake = IVR_VideoPath;
 
+        qWarning() << "----------IVR-----------------------";
+        qWarning() << "Computing Frames/Recording Values   ";
+        qWarning() << "----------IVR-----------------------";
         //-------------------------------------------------------------------------
         //Check the recording smoothness...
         //-------------------------------------------------------------------------
         frames_per_second = IVR_GetRecFPS();
 
         //If we not have frames to process stop here..
-        if(frames_per_second==0)return;
+        if(frames_per_second==0)
+        {
+            qWarning() << "----------IVR-----------------------------------";
+            qWarning() << "Warning! The FPS calculation are returning Zero!";
+            qWarning() << "Setting Up a default 60 FPS recordingf setup    ";
+            qWarning() << "----------IVR-----------------------------------";
+            frames_per_second = 60;
+        }
 
         //Set recording Mode...
         rec_mode  = IVR_RecordingMode;
 
+        qWarning() << "----------IVR-----------------------";
+        qWarning() << "Computing Frame Dimensions          ";
+        qWarning() << "----------IVR-----------------------";
         //-------------------------------------------------------------------------
         //Check the Video Capture Parameters and Codecs
         //-------------------------------------------------------------------------
@@ -695,6 +737,9 @@ bool CIVRVirtualCamera::IVR_CompileTake()
 
         }
 
+        qWarning() << "----------IVR-------------";
+        qWarning() << "Finishing Compilation";
+        qWarning() << "----------IVR-------------";
         //-------------------------------------------------------------------------
         //Final Recording Setup
         //-------------------------------------------------------------------------

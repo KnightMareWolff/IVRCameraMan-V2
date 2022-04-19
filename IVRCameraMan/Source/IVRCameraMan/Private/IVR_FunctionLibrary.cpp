@@ -41,6 +41,16 @@ FString           UIVR_FunctionLibrary::pIVR_FrameFilesPath = FPaths::ProjectDir
 IVRLowLevelSDK* UIVR_FunctionLibrary::pIVR_LowLevelInterface = nullptr;
 bool            UIVR_FunctionLibrary::pIVR_LowLevelActive    = false;
 
-
+/**
+ *The Global Config File Handle the initial parameters for the Low Level Cams and system configurations.
+ */
 FConfigFile     UIVR_FunctionLibrary::pIVR_ProjectConfigFile;
+
+/**
+ *The Global Media Handler Make possible we manipulate media (Video Files , audio and Text) using industry codecs/decoders.
+ *This attribute are expected to be used in cases we need manipulate media outside of a simulation and rendering loops.
+ *If you need make a real-time manipulation during your recording i suggest you wait for some upcomming implementations or
+ *put this inside of a AsyncTask to not block your FPS.
+ */
+CIVRMediaHandler* UIVR_FunctionLibrary::pIVR_MediaHandler = nullptr;
 

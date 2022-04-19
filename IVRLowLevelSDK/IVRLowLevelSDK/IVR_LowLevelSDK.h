@@ -9,6 +9,7 @@
 #include "IVR_VirtualCamera.h"
 #include "IVR_CameraTake.h"
 #include "IVR_LockFreeQueue.h"
+#include "IVR_MediaHandler.h"
 
 
 class IVRLOWLEVELSDK_EXPORT IVRLowLevelSDK : public QObject
@@ -49,7 +50,7 @@ public:
 
     //Miscellaneous Functions
     bool IVR_CheckRecordingState  (uint pIVR_CameraId );
-    bool IVR_CleanUpRecordVSession(                                     );
+    bool IVR_CleanUpRecordVSession(                   );
 
     //Configuration Folders
     QString IVR_RootFolder;

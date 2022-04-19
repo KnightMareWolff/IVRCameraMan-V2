@@ -1,0 +1,1 @@
+vcpkg install ffmpeg[core,ffmpeg,ffplay,ffprobe,swresample,swscale,avdevice,aom,ass,avisynthplus,dav1d,fdk-aac,mp3lame,openh264,soxr,vorbis,vpx,x264,x265]:x64-windows-rel

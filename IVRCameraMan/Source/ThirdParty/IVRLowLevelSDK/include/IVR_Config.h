@@ -53,6 +53,19 @@
 #include "opencv2/videostab.hpp"
 #include "opencv2/xfeatures2d.hpp"
 
+extern "C" {
+#include "libavcodec/avcodec.h"
+#include "libavutil/avassert.h"
+#include "libavutil/channel_layout.h"
+#include "libavutil/opt.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/mathematics.h"
+#include "libavutil/timestamp.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
+}
+
 using namespace std;
 using namespace cv;
 using namespace cv::ml;

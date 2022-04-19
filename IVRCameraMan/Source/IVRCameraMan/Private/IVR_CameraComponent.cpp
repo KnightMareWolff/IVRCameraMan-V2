@@ -104,18 +104,82 @@ void UIVR_CameraComponent::OnBackBufferReady(SWindow& SlateWindow, const FTextur
 		//We want just one Image since many of them are redundant
 		if (IVR_LockedRendering == false)return;
 		if (!IVR_RenderTarget)return;
-		if (!IVR_RenderTarget->Resource)return;
+		if (!IVR_RenderTarget->GetResource())return;
+
+		//Temporary visible slate buffers
+		/*
+		TArray< TSharedRef< SWidget >> slateScreens;
+		 
+		auto allChilds = SlateWindow.GetAllChildren();
+		
+		for (int i = 0; i < allChilds->Num(); i++)
+		{
+			auto child        = allChilds->GetChildAt(i);
+
+			if (child.Get().IsEnabled() &&
+				child.Get().IsVolatile())
+			{
+				slateScreens.Add(child);
+			}
+			
+		}
+
+		for (auto screen : slateScreens)
+		{
+			TArray<FColor>   IVR_WidgetBuffer;
+			FIntVector       IVR_WidgetBufferSizes;
+
+			const bool result = FSlateApplication::Get().TakeScreenshot(screen, IVR_WidgetBuffer, IVR_WidgetBufferSizes);
+		}
+		*/
 
 		//Get the Cached Texture Info
 		FRHICommandListImmediate& RHICmdList = GRHICommandList.GetImmediateCommandList();
-		FRHITexture2D* CachedTexture = IVR_RenderTarget->Resource->TextureRHI->GetTexture2D();
+		FRHITexture2D* CachedTexture = IVR_RenderTarget->GetResource()->TextureRHI->GetTexture2D();
 
-		FRHICopyTextureInfo CopyInfo;
 		//Copy the BackBuffer to the Cached Texture
-		RHICmdList.CopyTexture(BackBuffer, CachedTexture, CopyInfo);
+		//It seems something change at the Slate BackBuffer Capture. Untill 4.27 we copy the backbuffer
+		//To a Cached texture to send the image frame, and for example , if we invert the source with the
+		//target a rendered window screen are obtained.
+		//Now with 5.0 if we use the backbuffer the screen of the active camera are returned(Not the image
+		//visualized by this camera) and are returned the screen image with a type of "ilumination" screen...
+		//I will investigate more this cas, but a turnaround is copy the Cached Texture comming from the Render
+		//Target.
+		//FRHICopyTextureInfo CopyInfo;
+		//RHICmdList.CopyTexture(BackBuffer, CachedTexture, CopyInfo);
 		
 		//Get the Pixels of the Image
 		GetTexturePixels(CachedTexture, IVR_RawBuffer);
+
+		AsyncTask(ENamedThreads::GameThread, [this]()
+		{
+			IVR_FrameInformation.IVR_IsValid = true;
+			IVR_FrameInformation.IVR_CameraName = QString(TCHAR_TO_UTF8(*IVR_CameraName));
+			IVR_FrameInformation.IVR_CameraType = (uint)IVR_LowLevelType;
+			IVR_FrameInformation.IVR_CameraID = (uint)IVR_LowLevelIndex;
+			IVR_FrameInformation.IVR_FrameFPS = (uint)IVR_FPS;
+			IVR_FrameInformation.IVR_FrameDT = IVR_DT;
+			IVR_FrameInformation.IVR_Timestamp = FDateTime::UtcNow().ToUnixTimestamp();
+
+			IVR_LowLevelCam->IVR_RecordData(IVR_FrameInformation);
+		});
+
+		AsyncTask(ENamedThreads::GameThread, [this]()
+		{
+			IVR_FrameBuffer.IVR_Width = IVR_Width;
+			IVR_FrameBuffer.IVR_Height = IVR_Height;
+			IVR_FrameBuffer.IVR_ColorChannels = IVR_RawBuffer.GetTypeSize();
+
+			if (IVR_FrameBuffer.IVR_Buffer.total() > 0)
+			{
+				IVR_FrameBuffer.IVR_Buffer = Mat();
+			}
+
+			IVR_FrameBuffer.IVR_Buffer = Mat(IVR_Height, IVR_Width, CV_8UC4, (char*)IVR_RawBuffer.GetData());
+
+			//Insert the Raw Image at the Render queue
+			IVR_LowLevelCam->IVR_RecordBuffer(IVR_FrameBuffer);
+		});
 
 		//Lock the next rendering
 		IVR_LockedRendering = false;
@@ -126,7 +190,7 @@ void UIVR_CameraComponent::OnBackBufferReady(SWindow& SlateWindow, const FTextur
 // Called every frame
 void UIVR_CameraComponent::IVR_CustomTick()
 {
-	IVR_DT  = (GetWorld()->GetTimeSeconds() - IVR_StartTime);
+	IVR_DT  = (GetWorld()->GetTimeSeconds() - IVR_ComponentStartTime);
 	IVR_FPS = (1.0 / IVR_DT);
 	
 	//Draw Debbug Camera, only if enabled by the Director
@@ -164,48 +228,14 @@ void UIVR_CameraComponent::IVR_CustomTick()
 
 				// Fire Up the Render Queue
 				OnBackBufferReadyToPresent = FSlateApplication::Get().GetRenderer()->OnBackBufferReadyToPresent().AddUObject(this, &UIVR_CameraComponent::OnBackBufferReady);
-
+				
 			});
 		}
-
-		//Capture The Frame Information and free the BackBuffer to be sent to LowLevel API.
-		if (IVR_RawBuffer.Num()>0)
+		else
 		{
-			if (IsInGameThread() && !IsInRenderingThread())
-			{
-				AsyncTask(ENamedThreads::GameThread, [this]()
-				{
-					//IVR_BufferSection.Lock();
-
-					IVR_FrameInformation.IVR_IsValid = true;
-					IVR_FrameInformation.IVR_CameraName = QString(TCHAR_TO_UTF8(*IVR_CameraName));
-					IVR_FrameInformation.IVR_CameraType = (uint)IVR_LowLevelType;
-					IVR_FrameInformation.IVR_CameraID = (uint)IVR_LowLevelIndex;
-					IVR_FrameInformation.IVR_FrameFPS = (uint)IVR_FPS;
-					IVR_FrameInformation.IVR_FrameDT = IVR_DT;
-					IVR_FrameInformation.IVR_Timestamp = FDateTime::UtcNow().ToUnixTimestamp();
-
-					IVR_LowLevelCam->IVR_RecordData(IVR_FrameInformation);
-
-					IVR_FrameBuffer.IVR_Width = IVR_Width;
-					IVR_FrameBuffer.IVR_Height = IVR_Height;
-					IVR_FrameBuffer.IVR_ColorChannels = IVR_RawBuffer.GetTypeSize();
-
-					if (IVR_FrameBuffer.IVR_Buffer.total() > 0)IVR_FrameBuffer.IVR_Buffer = Mat();
-					IVR_FrameBuffer.IVR_Buffer = Mat(IVR_Height, IVR_Width, CV_8UC4, (char*)IVR_RawBuffer.GetData());
-
-					//Insert the Raw Image at the Render queue
-					IVR_LowLevelCam->IVR_RecordBuffer(IVR_FrameBuffer);
-
-					IVR_RawBuffer.Empty();
-
-					//IVR_BufferSection.Unlock();
-				});
-			}
+			IVR_LockedRendering = true;
 		}
 
-		IVR_LockedRendering = true;
-		
 	}break;
 	case 1: //Stop Recording
 	{
@@ -224,7 +254,7 @@ void UIVR_CameraComponent::IVR_CustomTick()
 	}
 
 	// For Each Tick...
-	IVR_StartTime = GetWorld()->GetTimeSeconds();
+	IVR_ComponentStartTime = GetWorld()->GetTimeSeconds();
 }
 
 bool UIVR_CameraComponent::IVR_StartRecord()
@@ -246,7 +276,7 @@ bool UIVR_CameraComponent::IVR_StartRecord()
 	//Fire-Up the LowLevel Render Queue
 	IVR_LowLevelCam->IVR_StartRecord();
 	// Time when the press play...
-	IVR_StartTime = GetWorld()->GetTimeSeconds();
+	IVR_ComponentStartTime = GetWorld()->GetTimeSeconds();
 
 	IVR_RecordingState = 0;
 	return true;
@@ -264,7 +294,7 @@ bool UIVR_CameraComponent::IVR_StopRecord()
 	//Shut-Down the LowLevel Render Queue
 	IVR_LowLevelCam->IVR_StopRecord();
 	// Time when the press play...
-	IVR_StartTime = GetWorld()->GetTimeSeconds();
+	IVR_ComponentStartTime = GetWorld()->GetTimeSeconds();
 
 	IVR_RecordingState = 1;
 	return true;

@@ -10,17 +10,15 @@
 	"DocsURL": "http://insaneframework.com/ivr-camera-man/",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/099c0fd27b6e434db3adfaec71a2b82c",
 	"SupportURL": "http://insaneframework.com/ivr-camera-man/",
-  "EngineVersion": "4.27.0",
+	"EngineVersion": "5.0.0",
 	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "IVRCameraMan",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64"
 			]
 		},
@@ -28,7 +26,7 @@
 			"Name": "IVRCameraManEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64"
 			]
 		},
@@ -36,7 +34,7 @@
 			"Name": "IVRCVHelper",
 			"Type": "Runtime",
 			"LoadingPhase": "EarliestPossible",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64"
 			]
 		}
