@@ -24,7 +24,7 @@ AIVR_CameraActor::AIVR_CameraActor()
 
 }
 
-void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, ECameraType LowLevelType, ERecordingMode LowLevelRecordingMode)
+void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, ECameraType LowLevelType, ERecordingMode LowLevelRecordingMode, bool UseEffects, FString EffectName, bool UseCompression)
 {
 	if (IVR_ActorCam != nullptr)
 	{
@@ -56,17 +56,61 @@ void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, ECameraType LowLev
 
 		IVR_ActorCam->IVR_RegisterCamera(CamName, LwTp , LwRm);
 
+		if (UseEffects)
+		{
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsEnabled = true;
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsName = QString(TCHAR_TO_UTF8(*EffectName));
+		}
+		else
+		{
+			//To prevent static low level objects preserve previous values
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsEnabled = false;
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsName = QString(" ");
+		}
+
+		if (UseCompression)
+		{
+			IVR_ActorCam->IVR_LowLevelCam->IVR_CompressionEnabled = true;
+		}
+		else
+		{
+			//To prevent static low level objects preserve previous values
+			IVR_ActorCam->IVR_LowLevelCam->IVR_CompressionEnabled = false;
+		}
+
 		IVR_SelfRegistered = true;
 	}
 }
 
-void AIVR_CameraActor::IVR_RegisterCamera(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode)
+void AIVR_CameraActor::IVR_RegisterCameraML(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode, bool UseEffects, FString EffectName , bool UseCompression)
 {
 	if (IVR_ActorCam != nullptr)
 	{
 		FString CamName = CameraName +	FString::FromInt(UIVR_FunctionLibrary::IVR_GetCameraCounter(LowLevelType));
 		
 		IVR_ActorCam->IVR_RegisterCamera(CamName, LowLevelType, LowLevelRecordingMode);
+		
+		if (UseEffects)
+		{
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsEnabled = true;
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsName = QString(TCHAR_TO_UTF8(*EffectName));
+		}
+		else
+		{
+			//To prevent static low level objects preserve previous values
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsEnabled = false;
+			IVR_ActorCam->IVR_LowLevelCam->IVR_EffectsName = QString(" ");
+		}
+
+		if (UseCompression)
+		{
+			IVR_ActorCam->IVR_LowLevelCam->IVR_CompressionEnabled = true;
+		}
+		else
+		{
+			//To prevent static low level objects preserve previous values
+			IVR_ActorCam->IVR_LowLevelCam->IVR_CompressionEnabled = false;
+		}
 		
 		IVR_SelfRegistered = true;
 	}
@@ -77,7 +121,10 @@ void AIVR_CameraActor::IVR_CustomTick()
 	// Update target
 	if ((IVR_ActorCam != nullptr) && (IVR_MoveCamera))
 	{
-		IVR_ActorCam->IVR_CustomTick();
+		//AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
+		//{
+			IVR_ActorCam->IVR_CustomTick();
+		//});
 	}
 }
 
@@ -100,7 +147,27 @@ void AIVR_CameraActor::IVR_StopRecord(bool IVR_AutoRecord)
 		if (IVR_ActorCam->IVR_StopRecord())
 		{
 			IVR_MoveCamera = false;
-			if (IVR_AutoRecord)IVR_ActorCam->IVR_CompileVideo();
+			if (IVR_AutoRecord)
+			{
+				IVR_ActorCam->IVR_CompileVideo();
+				//AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
+				//{
+				//	while (!IVR_ActorCam->IVR_LowLevelCam->IVR_IsIddle);
+					//If we finish a simulation we clean up the mess... ;)
+				//	UIVR_FunctionLibrary::IVR_ShutdownLowLevelSystem();
+					//Map here the funxctions to return to blueprints when the recording finish...
+				//});
+			}
+			else
+			{
+				//AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [this]()
+				//{
+				//	while (!IVR_ActorCam->IVR_LowLevelCam->IVR_IsIddle);
+					//If we finish a simulation we clean up the mess... ;)
+				//	UIVR_FunctionLibrary::IVR_ShutdownLowLevelSystem();
+					//Map here the funxctions to return to blueprints when the recording finish...
+				//});
+			}
 		}
 		
 	}

@@ -2,14 +2,16 @@
 #define IVRLOWLEVELSDK_H
 
 #include "IVRLowLevelSDK_global.h"
-#include "IVR_ImageReader.h"
+#include "IVR_ImageHandler.h"
 #include "IVR_ImageFilter.h"
-#include "IVR_CameraReader.h"
+#include "IVR_RealCamera.h"
 #include "IVR_VideoReader.h"
 #include "IVR_VirtualCamera.h"
 #include "IVR_CameraTake.h"
 #include "IVR_LockFreeQueue.h"
 #include "IVR_MediaHandler.h"
+#include "IVR_Classifier.h"
+#include "IVR_Shrinker.h"
 
 
 class IVRLOWLEVELSDK_EXPORT IVRLowLevelSDK : public QObject
@@ -32,6 +34,7 @@ public:
                                          QString          &pIVR_CameraName  ,
                                          qint64            pIVR_Timestamp   );
 
+    void IVR_RemoveVirtualCam(uint pIVR_CameraId);
 
     //"Out of the Box" GUI
     void IVR_FireUpGUIThread();

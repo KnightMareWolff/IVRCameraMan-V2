@@ -20,6 +20,33 @@
 #define IVR_Task_Type_Take    1
 #define IVR_Task_Type_Gbuffer 2
 
+#define IVR_Image_Filter_Cartoon   0
+#define IVR_Image_Filter_Histogram 1
+#define IVR_Image_Filter_Binary    2
+#define IVR_Image_Filter_Crop      3
+#define IVR_Image_Filter_Contours  4
+#define IVR_Image_Filter_Shapes    5
+#define IVR_Image_Filter_Dilate    6
+#define IVR_Image_Filter_OldFilm   7
+#define IVR_Image_Filter_PencilSkt 8
+#define IVR_Image_Filter_Sepia     9
+#define IVR_Image_Filter_Emboss    10
+#define IVR_Image_Filter_DuoTone   11
+#define IVR_Image_Filter_Warm      12
+#define IVR_Image_Filter_Cold      13
+#define IVR_Image_Filter_Gotham    14
+#define IVR_Image_Filter_Sharpen   15
+#define IVR_Image_Filter_Detail    16
+#define IVR_Image_Filter_Invert    17
+#define IVR_Image_Filter_Stylize   18
+#define IVR_Image_Filter_Ghost     19
+
+#define IVR_Compressor_Type_Zlib       0
+#define IVR_Compressor_Type_Miniz      1
+#define IVR_Compressor_Type_Libdeflate 2
+#define IVR_Compressor_Type_QuickLZ    3
+
+
 //The render buffer structure will be the main way to exchange data between the dll and Unreal
 typedef class IVRLOWLEVELSDK_EXPORT IVR_RenderBuffer
 {
@@ -29,6 +56,7 @@ public:
         IVR_Width          = 0;
         IVR_Height         = 0;
         IVR_ColorChannels  = 0;
+        IVR_ShrinkSize     = 0;
         IVR_Buffer         = Mat();
     }
 
@@ -38,6 +66,7 @@ public:
         IVR_Width          = copy.IVR_Width;
         IVR_Height         = copy.IVR_Height;
         IVR_ColorChannels  = copy.IVR_ColorChannels;
+        IVR_ShrinkSize     = copy.IVR_ShrinkSize;
 
         if (IVR_Buffer.total() > 0)IVR_Buffer = Mat();
 
@@ -49,6 +78,7 @@ public:
         IVR_Width          = t.IVR_Width;
         IVR_Height         = t.IVR_Height;
         IVR_ColorChannels  = t.IVR_ColorChannels;
+        IVR_ShrinkSize     = t.IVR_ShrinkSize;
 
         if (IVR_Buffer.total() > 0)IVR_Buffer = Mat();
 
@@ -68,6 +98,7 @@ public:
     int        IVR_Width        ;//Width of the Image
     int        IVR_Height       ;//Height of the Image
     int        IVR_ColorChannels;//Collor Channels of the Image collected
+    ulong      IVR_ShrinkSize   ;//Size of the shrinked buffer
 
     Mat IVR_Buffer       ;//Image of the rendered buffer in Unreal
 }IVR_RenderBuffer;

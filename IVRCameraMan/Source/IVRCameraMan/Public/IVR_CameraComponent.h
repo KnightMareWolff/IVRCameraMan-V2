@@ -15,9 +15,44 @@
 #include "AudioCaptureComponent.h"
 #include "AudioMixerBlueprintLibrary.h"
 #include "IVR_FunctionLibrary.h" //The Function Library already have the OpenCV Includes
+#include "Templates/SharedPointer.h"
 #include "Framework/Application/SlateApplication.h"
 #include "IVR_CameraComponent.generated.h"
 
+USTRUCT()
+struct FRenderRequest 
+{
+	GENERATED_BODY()
+
+public:
+
+	TArray<FColor> *Image;
+	FRenderCommandFence RenderFence;
+	
+	FRenderRequest()
+	{
+		Image = new TArray<FColor>();
+	}
+	
+	FRenderRequest(const FRenderRequest& copy)
+	{
+		Image       = copy.Image;
+		RenderFence = copy.RenderFence;
+	}
+
+	FRenderRequest& operator = (const FRenderRequest& t)
+	{
+		Image       = t.Image;
+		RenderFence = t.RenderFence;
+		return *this;
+	}
+
+	void CleanRenderRequest() 
+	{
+		Image->Empty();
+		Image->Shrink();
+	}
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class IVRCAMERAMAN_API UIVR_CameraComponent : public USceneComponent
@@ -91,7 +126,7 @@ public:
 	bool                      IVR_Enabled;
 	bool                      IVR_LockedRendering;
 	CIVRVirtualCamera*        IVR_LowLevelCam;
-
+	
 	//Time Measuring
 	float      IVR_ComponentStartTime;
 	
@@ -104,35 +139,21 @@ public:
 	USpringArmComponent     * IVR_Stabilizer;
 	USphereComponent*         IVR_CollisionSphere;
 
-	//-----------------------------------------------
-	//Critical Sections
-	//-----------------------------------------------
-	FCriticalSection          IVR_BufferSection;
-	FCriticalSection          IVR_AddCamSection;
-	FCriticalSection          IVR_UpdCamSection;
-	FCriticalSection          IVR_RecCamSection;
-
 	IVR_RenderBuffer IVR_FrameBuffer;
 	IVR_FrameData    IVR_FrameInformation;
 	TArray<FColor>   IVR_RawBuffer;
+
+	//-----------------------------------------------
+	//a Lock Free Queue for FrameBuffer recordings.
+	//-----------------------------------------------
+	// FRenderRequest* size 16 => ptr * 1000 = 16000 
+	LockFreeQueue<TSharedPtr<FRenderRequest>, 16000  > *IVR_RenderQueue;
+	CIVRShrinker* IVR_ShrinkerF;
+
 	//-----------------------------------------------
 	//Render Capture Functions
 	//-----------------------------------------------
 	void OnBackBufferReady(SWindow & SlateWindow, const FTexture2DRHIRef & BackBuffer);
 	FDelegateHandle OnBackBufferReadyToPresent;
-
-	void GetTexturePixels(FTexture2DRHIRef Texture, TArray<FColor>& OutPixels);
-
-	void UpdateTextureRegions(FTexture2DRHIRef IVR_Texture,
-		int32                   IVR_MipIndex,
-		uint32                  IVR_NumRegions,
-		FUpdateTextureRegion2D* IVR_Regions,
-		int32                   IVR_SrcPitch,
-		uint32                  IVR_SrcBpp,
-		uint8* IVR_SrcData,
-		bool                    IVR_FreeData);
-
-	FUpdateTextureRegion2D* IVR_ImageUpdateTextureRegion;
-
 
 };

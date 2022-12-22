@@ -61,6 +61,12 @@ public:
 	bool  IVR_AutoRecord;
 	UPROPERTY(EditAnywhere, Category = "IVR_OnCrane Camera Parameters")
 	ERecordingMode  IVR_RecordingMode;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnCrane Camera Parameters")
+	bool  IVR_UseEffects;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnCrane Camera Parameters")
+	FString  IVR_EffectName;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnCrane Camera Parameters")
+	bool     IVR_UseCompression;
 
 	float IVR_StartTime;
 	float IVR_CurrentTime;

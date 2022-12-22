@@ -32,6 +32,7 @@ public class IVRCVHelper: ModuleRules
             }
         );
 
+		PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
 		//PrivatePCHHeaderFile = "Public/IVROpenCVHelperModule.h";
 	}
 }

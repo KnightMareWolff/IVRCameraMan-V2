@@ -62,8 +62,10 @@ public class IVRCameraMan : ModuleRules
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		
-		
+
+
+		PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{

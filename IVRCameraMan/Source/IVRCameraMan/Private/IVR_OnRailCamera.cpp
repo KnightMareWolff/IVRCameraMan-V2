@@ -37,7 +37,7 @@ void AIVR_OnRailCamera::BeginPlay()
 		if (!IVR_RailCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultOnRailCam");
-			IVR_RailCam->IVR_RegisterCamera(CamName, IVR_CamType_OnRail, (int32)IVR_RecordingMode);
+			IVR_RailCam->IVR_RegisterCameraML(CamName, IVR_CamType_OnRail, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 	}
 	else
@@ -53,7 +53,7 @@ void AIVR_OnRailCamera::BeginPlay()
 		if (!IVR_RailCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultOnRailCam");
-			IVR_RailCam->IVR_RegisterCamera(CamName, IVR_CamType_OnRail, (int32)IVR_RecordingMode);
+			IVR_RailCam->IVR_RegisterCameraML(CamName, IVR_CamType_OnRail, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 
 		if (IVR_AutoStart)

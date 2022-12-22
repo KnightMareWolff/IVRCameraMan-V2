@@ -43,21 +43,21 @@ public:
 	// Action to perform with the TargetActor when the Overlap Begins
 	//Warning! If it´s not an CameraActor , a Crane or RailCam It will be ignored!
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IVR_Camera Trigger Parameters")
-		EActionType IVR_TriggerActionIn;
+	EActionType IVR_TriggerActionIn;
 
 	// Informs the TargetActor LowLevel Type
 	//Warning! If it´s not informed or Invalid, the action will be ignored!
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IVR_Camera Trigger Parameters")
-		ECameraType IVR_OutType;
+	ECameraType IVR_OutType;
 
 	//specific target actor for overlap End
 	UPROPERTY(EditAnywhere, Category = "IVR_Camera Trigger Parameters")
-		class AActor* IVR_TargetActorOut;
+	class AActor* IVR_TargetActorOut;
 
 	// Action to perform with the TargetActor when the Overlap Ends
 	//Warning! If it´s not an CameraActor , a Crane or RailCam It will be ignored!
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IVR_Camera Trigger Parameters")
-		EActionType  IVR_TriggerActionOut;
+	EActionType  IVR_TriggerActionOut;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "IVR_Camera Trigger Parameters")

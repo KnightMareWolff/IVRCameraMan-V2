@@ -14,9 +14,11 @@ public class IVRLowLevelSDK : ModuleRules
 			string PlatformDir = Target.Platform.ToString();
 			string IncPath = Path.Combine(ModuleDirectory, "include");
 			string FpgPath = Path.Combine(ModuleDirectory, "include/ffmpeg");
+			string QlzPath = Path.Combine(ModuleDirectory, "include/quicklz");
 
 			PublicSystemIncludePaths.Add(IncPath);
 			PublicSystemIncludePaths.Add(FpgPath);
+			PublicSystemIncludePaths.Add(QlzPath);
 
 			string LibPath = Path.Combine(ModuleDirectory, "lib", PlatformDir);
 			string BinaryPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../Binaries/ThirdParty/IVRLowLevelSDK", PlatformDir));
@@ -45,6 +47,8 @@ public class IVRLowLevelSDK : ModuleRules
 			string F6LibName = "swresample";
 			string F7LibName = "swscale";
 
+			string QLLibName = "quicklz150_64_1";
+
 			PublicAdditionalLibraries.Add(Path.Combine(LibPath, CVLibName + ".lib"));
 			PublicAdditionalLibraries.Add(Path.Combine(LibPath, LVLibName + ".lib"));
 
@@ -60,6 +64,8 @@ public class IVRLowLevelSDK : ModuleRules
 			PublicAdditionalLibraries.Add(Path.Combine(LibPath, F5LibName + ".lib"));
 			PublicAdditionalLibraries.Add(Path.Combine(LibPath, F6LibName + ".lib"));
 			PublicAdditionalLibraries.Add(Path.Combine(LibPath, F7LibName + ".lib"));
+
+			PublicAdditionalLibraries.Add(Path.Combine(LibPath, QLLibName + ".lib"));
 
 			string CVDLLName = CVLibName + ".dll";
 			string LVDLLName = LVLibName + ".dll";
@@ -89,6 +95,8 @@ public class IVRLowLevelSDK : ModuleRules
 			string F6DLLName = F6LibName + "-3.dll";
 			string F7DLLName = F7LibName + "-5.dll";
 
+			string QLDLLName = QLLibName + ".dll";
+
 			PublicDelayLoadDLLs.Add(CVDLLName);
 			PublicDelayLoadDLLs.Add(LVDLLName);
 
@@ -104,6 +112,8 @@ public class IVRLowLevelSDK : ModuleRules
 			PublicDelayLoadDLLs.Add(F5DLLName);
 			PublicDelayLoadDLLs.Add(F6DLLName);
 			PublicDelayLoadDLLs.Add(F7DLLName);
+
+			PublicDelayLoadDLLs.Add(QLDLLName);
 
 			RuntimeDependencies.Add(Path.Combine(BinaryPath, CVDLLName));
 			RuntimeDependencies.Add(Path.Combine(BinaryPath, LVDLLName));
@@ -121,6 +131,10 @@ public class IVRLowLevelSDK : ModuleRules
 			RuntimeDependencies.Add(Path.Combine(BinaryPath, F6DLLName));
 			RuntimeDependencies.Add(Path.Combine(BinaryPath, F7DLLName));
 
+			RuntimeDependencies.Add(Path.Combine(BinaryPath, QLDLLName));
+
+			PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
+
 			PublicDefinitions.Add("WITH_OPENCV=1");
 			PublicDefinitions.Add("OPENCV_PLATFORM_PATH=Binaries/ThirdParty/IVRLowLevelSDK/" + PlatformDir);
 			PublicDefinitions.Add("OPENCV_DLL_NAME=" + CVDLLName);
@@ -137,6 +151,8 @@ public class IVRLowLevelSDK : ModuleRules
 			PublicDefinitions.Add("FPEGF5_DLL_NAME=" + F5DLLName);
 			PublicDefinitions.Add("FPEGF6_DLL_NAME=" + F6DLLName);
 			PublicDefinitions.Add("FPEGF7_DLL_NAME=" + F7DLLName);
+
+			PublicDefinitions.Add("QLIBF1_DLL_NAME=" + QLDLLName);
 
 		}
 		else // unsupported platform

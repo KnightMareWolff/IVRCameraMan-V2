@@ -37,11 +37,11 @@ public:
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
 	bool IVR_SetTransform(FTransform pTransform);
 	UFUNCTION(Category = "CameraMan|Objects|IVR_CameraActor", BlueprintCallable)
-	void IVR_RegisterCamera(FString CameraName, ECameraType LowLevelType, ERecordingMode LowLevelRecordingMode);
+	void IVR_RegisterCamera(FString CameraName, ECameraType LowLevelType, ERecordingMode LowLevelRecordingMode, bool UseEffects , FString EffectName, bool UseCompression);
 
-	void  IVR_RegisterCamera(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode);
-	bool  IVR_MoveCamera;
-	bool  IVR_SelfRegistered;
+	void IVR_RegisterCameraML(FString CameraName, int32 LowLevelType, int32 LowLevelRecordingMode, bool UseEffects , FString EffectName , bool UseCompression);
+	bool IVR_MoveCamera;
+	bool IVR_SelfRegistered;
 
 	FCriticalSection          IVR_UpdCamSection;
 

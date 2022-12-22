@@ -38,7 +38,7 @@ void AIVR_OnCraneCamera::BeginPlay()
 		if (!IVR_CraneCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultOnCraneCam");
-			IVR_CraneCam->IVR_RegisterCamera(CamName, IVR_CamType_OnCrane, (int32)IVR_RecordingMode);
+			IVR_CraneCam->IVR_RegisterCameraML(CamName, IVR_CamType_OnCrane, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 	}
 	else
@@ -53,7 +53,7 @@ void AIVR_OnCraneCamera::BeginPlay()
 		if (!IVR_CraneCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultOnCraneCam");
-			IVR_CraneCam->IVR_RegisterCamera(CamName, IVR_CamType_OnCrane, (int32)IVR_RecordingMode);
+			IVR_CraneCam->IVR_RegisterCameraML(CamName, IVR_CamType_OnCrane, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 
 		if (IVR_AutoStart)

@@ -11,7 +11,7 @@
     #define IVRLOWLEVELSDK_EXPORT
 #endif
 
-#pragma warning( disable : 4251 4244 4267)
+#pragma warning( disable : 4251 4244 4267 4005)
 
 //Comment/ucomment when its bein used inside Unreal
 #include "QtWidgets/qapplication.h"
@@ -31,6 +31,7 @@
 #include "QtWidgets/qfiledialog.h"
 #include "QtCore/qfuture.h"
 #include "QtConcurrent/QtConcurrent"
+#include "QtCore/qelapsedtimer.h"
 
 #include <vector>
 #include <string>
@@ -64,6 +65,10 @@ extern "C" {
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
+}
+
+extern "C" {
+#include "quicklz.h"
 }
 
 using namespace std;

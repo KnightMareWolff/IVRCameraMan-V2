@@ -103,7 +103,7 @@ void AIVR_CameraMan::BeginPlay()
 		if (!IVR_CharacterCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultCameraMan");
-			IVR_CharacterCam->IVR_RegisterCamera(CamName, IVR_CamType_CameraMan,(int32) IVR_RecordingMode);
+			IVR_CharacterCam->IVR_RegisterCameraML(CamName, (int32)IVR_CamType_CameraMan,(int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 	}
 	else
@@ -114,7 +114,7 @@ void AIVR_CameraMan::BeginPlay()
 		if (!IVR_CharacterCam->IVR_SelfRegistered)
 		{
 			FString CamName = FString("DefaultCameraMan");
-			IVR_CharacterCam->IVR_RegisterCamera(CamName, IVR_CamType_CameraMan, (int32)IVR_RecordingMode);
+			IVR_CharacterCam->IVR_RegisterCameraML(CamName, (int32)IVR_CamType_CameraMan, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 		}
 
 		IVR_CharacterCam->IVR_SetTransform(GetActorTransform());
@@ -281,7 +281,7 @@ void AIVR_CameraMan::IVR_GrabbSpawner()
 
 			//Register the Child
 			FString CamName = FString("AutoSpawned");
-			IVR_ChildCams[Counter]->IVR_CharacterCam->IVR_RegisterCamera(CamName, IVR_CamType_CameraMan, (int32)IVR_RecordingMode);
+			IVR_ChildCams[Counter]->IVR_CharacterCam->IVR_RegisterCameraML(CamName, IVR_CamType_CameraMan, (int32)IVR_RecordingMode, IVR_UseEffects, IVR_EffectName, IVR_UseCompression);
 			Counter++;
 		}
 	}

@@ -57,6 +57,12 @@ public:
 	bool  IVR_AutoRecord;
 	UPROPERTY(EditAnywhere, Category = "IVR_OnRail Camera Parameters")
 	ERecordingMode  IVR_RecordingMode;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnRail Camera Parameters")
+	bool     IVR_UseEffects;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnRail Camera Parameters")
+	FString  IVR_EffectName;
+	UPROPERTY(EditAnywhere, Category = "IVR_OnRail Camera Parameters")
+    bool     IVR_UseCompression;
 
 	//specific target actor for overlap Begin
 	UPROPERTY(EditAnywhere, Category = "IVR_OnRail Camera Parameters")

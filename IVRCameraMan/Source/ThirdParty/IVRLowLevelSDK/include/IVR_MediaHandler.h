@@ -3,7 +3,7 @@
 
 #include "IVRLowLevelSDK_global.h"
 
-class IVRLOWLEVELSDK_EXPORT CIVRMediaHandler
+class IVRLOWLEVELSDK_EXPORT CIVRMediaHandler : public QObject
 {
 public:
     CIVRMediaHandler();
@@ -48,7 +48,19 @@ public:
     bool IVR_MuxMedia  (const QString pVideoFileName,const QString pAudioFileName ,const QString pOutputFileName);
 
     //-----------------------------------------------------------------------
-    //Concatenates two Video Files one after other (ReMuxing)
+    //DeMux a Video File in a Sound File & Video File
+    //-----------------------------------------------------------------------
+    //Warning:
+    //
+    //The function expects the full path to the file + filename + extension
+    //----------------------------------------------------------------------
+    //Example of use:
+    //IVR_DemuxMedia("VideoInput.mp4" ,"AudioOutput.mp3","VideoOutput.mp4");
+    //--------------------------------------------------------------------
+    bool IVR_DemuxMedia (const QString pVideoFileName,const QString pAudioOutputFileName ,const QString pVideoOutputFileName);
+
+    //-----------------------------------------------------------------------
+    //Concatenates two Media Files one after other (with ReMuxing)
     //-----------------------------------------------------------------------
     //Warning:
     //The function expect two video only realtime videos to be concatenated
@@ -65,19 +77,41 @@ public:
     //--------------------------------------------------------------------
     bool IVR_CatMedia  (const QString pFirstVidFName,const QString pSecondVidFName,const QString pOutputFileName);
 
+    //-----------------------------------------------------------------------
+    //Concatenates two Video Files one after other (Frame by Frame)
+    //-----------------------------------------------------------------------
+    //Warning:
+    //The function expect two video only realtime videos to be concatenated
+    //
+    //All streams like sound or titles will be ignored.
+    //
+    //The function expects the full path to the file + filename + extension
+    //----------------------------------------------------------------------
+    //Example of use:
+    //IVR_CatMedia("VideoInput01.mp4" ,"VideoInput02.mp4","VideoOutput.mp4");
+    //--------------------------------------------------------------------
+    bool IVR_CatVideo  (const QString pFirstVidFName,const QString pSecondVidFName,const QString pOutputFileName);
+
 private:
 
     void IVR_OpenInpMedia(const QString pFilename);
     void IVR_OpenOutMedia(const QString pFilename);
+    void IVR_OpenOutVideo(const QString pFilename);
+    void IVR_OpenOutAudio(const QString pFilename);
     void IVR_OpenSndMedia(const QString pFilename);
     void IVR_OpenAuxMedia(const QString pFilename);
     void IVR_FinishOp();
 
-    AVOutputFormat  *IVR_OutputFormat     = NULL;
-    AVFormatContext *IVR_InputFmtContext  = NULL;
-    AVFormatContext *IVR_AuxilFmtContext  = NULL;
-    AVFormatContext *IVR_OutputFmtContext = NULL;
-    AVFormatContext *IVR_SoundFmtContext  = NULL;
+    AVOutputFormat  *IVR_OutputFormat      = NULL;
+    AVOutputFormat  *IVR_OutputFormatVideo = NULL;
+    AVOutputFormat  *IVR_OutputFormatAudio = NULL;
+
+    AVFormatContext *IVR_InputFmtContext   = NULL;
+    AVFormatContext *IVR_AuxilFmtContext   = NULL;
+    AVFormatContext *IVR_OutputFmtContext  = NULL;
+    AVFormatContext *IVR_SoundFmtContext   = NULL;
+    AVFormatContext *IVR_OutputVideoContext= NULL;
+    AVFormatContext *IVR_OutputAudioContext= NULL;
 
     AVPacket IVR_MediaPacket;
 
@@ -85,6 +119,9 @@ private:
     QString IVR_OutputFilename;
     QString IVR_SoundFilename;
     QString IVR_AuxilFilename;
+    QString IVR_OutputVideoName;
+    QString IVR_OutputAudioName;
+
 
     int *IVR_StreamsMap      = NULL;
     int  IVR_NumberOfStreams = 0;

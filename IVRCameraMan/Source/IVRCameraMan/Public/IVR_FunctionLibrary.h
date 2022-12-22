@@ -11,9 +11,11 @@
 #include "Kismet/KismetInputLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetRenderingLibrary.h"
 #include "Misc/MessageDialog.h"
 #include "Misc/DateTime.h"
 #include "Containers/Queue.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 #if WITH_OPENCV
 #include "IVROpenCVHelper.h"
@@ -59,6 +61,9 @@ enum class EActionType : uint8
 	None      = 4 UMETA(DisplayName = "None")
 };
 
+/**
+* Enumerates all Camera types.
+*/
 UENUM(BlueprintType)
 enum class ECameraType : uint8
 {
@@ -69,6 +74,9 @@ enum class ECameraType : uint8
 	None        = 4 UMETA(DisplayName = "None")
 };
 
+/**
+* Enumerates all recording Nodes.
+*/
 UENUM(BlueprintType)
 enum class ERecordingMode : uint8
 {
@@ -78,6 +86,94 @@ enum class ERecordingMode : uint8
 	TimeAproximation = 3 UMETA(DisplayName = "Record with Time Aproximation"),
 	Stabilised       = 4 UMETA(DisplayName = "Stabilize the Video after Record"),
 	SuperRes         = 5 UMETA(DisplayName = "SuperRes the Video after Record")
+};
+
+/**
+* Enumerates all effect types.
+*/
+UENUM(BlueprintType)
+enum class EEffectType : uint8
+{
+	Cartoon      = 0  UMETA(DisplayName = "Cartoon Effect"),
+	Binary       = 1  UMETA(DisplayName = "Binary Effect"),
+	Dilate       = 2  UMETA(DisplayName = "Dilate Effect"),
+	OldFilm      = 3  UMETA(DisplayName = "Old Film Record Effect"),
+	PencilSketch = 4  UMETA(DisplayName = "Pencil Sketch Effect"),
+	Sepia        = 5  UMETA(DisplayName = "Sepia Effect"),
+	Emboss       = 6  UMETA(DisplayName = "Emboss Effect"),
+	DuoTone      = 7  UMETA(DisplayName = "Duo Tone Effect"),
+	Warm         = 8  UMETA(DisplayName = "Warm Effect"),
+	Cold         = 9  UMETA(DisplayName = "Cold Effect"),
+	Gotham       = 10 UMETA(DisplayName = "Gotham Effect"),
+	Sharpen      = 11 UMETA(DisplayName = "Sharpen Effect"),
+	Detail       = 12 UMETA(DisplayName = "Detail Effect"),
+	Invert       = 13 UMETA(DisplayName = "Invert Effect"),
+	Stylize      = 14 UMETA(DisplayName = "Stylize Effect"),
+	Ghost        = 15 UMETA(DisplayName = "Ghost Effect"),
+	None         = 16 UMETA(DisplayName = "No Effect")
+};
+
+/**
+* Hold all effect parameters.
+*/
+USTRUCT(BlueprintType)
+struct FIVR_EffectParameters
+{
+	GENERATED_BODY()
+
+public:
+	//Set the First Treshold value
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_Treshold01;
+	//Set the Second Treshold value
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_Treshold02;
+	//Set the Aperture Size(Cartoon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ApertureSize;
+	//Enable some effects to Use the L2 Gradient Value (Cartoon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	bool  pIVR_UseL2Gradient;
+	//Set the kernel size for some effects
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_KernelSize;
+	//Set the Sigma S value for some effects.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_SigmaS;
+	//Set the Sigma R value for some effects.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_SigmaR;
+	//Set the number of interactions for effects that have repeated executions(Blurr).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_Iteractions;
+	//Set the Light Intensity for some effects(Duo Tone).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_LightIntensity;
+	//Set the Tone 01 (R,G or B) value for some effects(Duo Tone). Range 0 - 2
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ToneChannel01;
+	//Set the Tone 02 (R,G or B) value for some effects(Duo Tone). Range 0 - 2
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ToneChannel02;
+	//Set the expression value used for some effects to change the behaviour of the effect.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_ExpValue;
+	//Set the Shade Factor applyed in some effects
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	float pIVR_ShadeFactor;
+	//Some effects can generate Grayscale or Colored effects, use this flag to define it.(Pencil Sketch)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	bool  pIVR_ColorOutput;
+	
+	//Set the Color Tones for Ghost Pixelating. Range 0 - 255
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ToneR;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ToneG;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_ToneB;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CameraMan|Effects|Parameters")
+	int   pIVR_Transparency;
 };
 
 /**
@@ -165,6 +261,33 @@ public:
 		QString pOutName = QString(TCHAR_TO_UTF8(*pIVR_OutputFullPath));
 
 		if (!pIVR_MediaHandler->IVR_MuxMedia(pVidName, pAudName, pOutName))
+		{
+			//the low level system have problems to Mux the file...
+			return false;
+		}
+
+		//All Good, check it out your file. :)
+		return true;
+	}
+
+	/**
+	* Support Function to Demux a Video(Video with sound) and Record them separetelly.
+	*
+	* Example of use:
+	*
+	* IVR_DeMuxVideo("VideoInput.mp4" ,"AudioOutPut.mp3","VideoOutput.mp4");
+	*/
+	UFUNCTION(Category = "CameraMan|Video|Functions", BlueprintCallable)
+	static bool IVR_DemuxVideo(FString pIVR_VideoFullPath, FString pIVR_AudioFullPath, FString pIVR_OutputFullPath)
+	{
+		//Oops, you dont have a media handler initialized...hummm
+		if (!pIVR_MediaHandler)return false;
+
+		QString pVidName = QString(TCHAR_TO_UTF8(*pIVR_VideoFullPath));
+		QString pAudName = QString(TCHAR_TO_UTF8(*pIVR_AudioFullPath));
+		QString pOutName = QString(TCHAR_TO_UTF8(*pIVR_OutputFullPath));
+
+		if (!pIVR_MediaHandler->IVR_DemuxMedia(pVidName, pAudName, pOutName))
 		{
 			//the low level system have problems to Mux the file...
 			return false;

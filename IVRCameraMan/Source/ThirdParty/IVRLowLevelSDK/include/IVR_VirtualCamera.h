@@ -5,13 +5,18 @@
 #include "IVR_Frame.h"
 #include "IVR_CameraTake.h"
 #include "IVR_LockFreeQueue.h"
+#include "IVR_ImageHandler.h"
+#include "IVR_Shrinker.h"
+#include "IVR_IFFReader.h"
+#include "IVR_MediaHandler.h"
 
 #define QUEUE_SIZE 2000;
 
-class IVRLOWLEVELSDK_EXPORT CIVRVirtualCamera
+class IVRLOWLEVELSDK_EXPORT CIVRVirtualCamera : public QObject
 {
 public:
     CIVRVirtualCamera();
+   ~CIVRVirtualCamera();
 
     CIVRVirtualCamera( const CIVRVirtualCamera & copy )
     {
@@ -28,6 +33,8 @@ public:
         IVR_ActualTake      = copy.IVR_ActualTake;
         IVR_Timestamp       = copy.IVR_Timestamp;
         IVR_FrameCounter    = copy.IVR_FrameCounter;
+        IVR_EffectsEnabled  = copy.IVR_EffectsEnabled;
+        IVR_EffectsName     = copy.IVR_EffectsName;
     }
 
     CIVRVirtualCamera& operator = (const CIVRVirtualCamera &t)
@@ -45,32 +52,25 @@ public:
         IVR_ActualTake      = t.IVR_ActualTake;
         IVR_Timestamp       = t.IVR_Timestamp;
         IVR_FrameCounter    = t.IVR_FrameCounter;
+        IVR_EffectsEnabled  = t.IVR_EffectsEnabled;
+        IVR_EffectsName     = t.IVR_EffectsName;
         return *this;
     }
 
-    uint  IVR_GetRecFPS();
-    uint  IVR_GetAverageFPS();
-    uint  IVR_GetBestFPS();
-    uint  IVR_GetDesiredFPS();
-    uint  IVR_GetFPSByTimeApprox();
-
-    bool IVR_RecordBuffer (const IVR_RenderBuffer &pIVR_FrameBuffer);
-    bool IVR_RecordData   (const IVR_FrameData &pIVR_FrameData);
+    bool IVR_RecordBuffer (const IVR_RenderBuffer &pIVR_FrameBuffer, const IVR_FrameData &pIVR_FrameData);
 
     bool IVR_StartRecord();
     bool IVR_StopRecord ();
     bool IVR_CompileTake();
 
-    void IVR_DataLoop();
-    void IVR_ImageLoop();
-
-
     //Store the real camera name
-    QString                   IVR_CameraName;
+    QString                   IVR_CameraName ;
     //Store the place where camera record videos(duplicated here for optimization reasons)
-    QString                   IVR_RootFolder;
+    QString                   IVR_RootFolder ;
     //Store the real camera type
-    uint                      IVR_CameraType   ;
+    uint                      IVR_CameraType ;
+    //Recording Elapsed Time
+    qint64                    IVR_ElapsedTime;
     //Store the Last FPS Collected by the camera recordings
     float                     IVR_DesiredFPS;
     //Store the recording mode of the Camera
@@ -83,32 +83,35 @@ public:
     bool                      IVR_IsRecording;
     //Flag to Know if the camera are recording the final video take(.mp4)
     bool                      IVR_IsCompiling;
+    //Flag to Know if the camera finish all Its operations(Will be uded by midlevel to delete the camera)
+    bool                      IVR_IsIddle;
     //Flag to Know if the camera have an Open Take to record Buffers
     bool                      IVR_haveOpenTake;
     //For every video recorded in a session, we record it in a take and cleanup the frames.
-    vector<CIVRCameraTake>    IVR_Takes;
+    vector<CIVRCameraTake*>   IVR_Takes;
     //When recording buffers the actual take will be used to direct access
     uint                      IVR_ActualTake;
     //Timestamp of the Camera Creation
     qint64                    IVR_Timestamp;
     //Timestamp of the Camera Creation
     qint64                    IVR_FrameCounter;
-
-    //-----------------------------------------------
-    //a Lock Free Queue for FrameBuffer recordings.
-    //-----------------------------------------------
-    // RenderBuffer size 112 => str * 60 = 6720
-    // FrameData    size 48  => str * 60 = 2880
-    LockFreeQueue<IVR_RenderBuffer, 6720  > *IVR_RenderQueue;
-    LockFreeQueue<IVR_FrameData   , 2880  > *IVR_DataQueue;
+    //Flag to Know if we need apply a Special Effect;
+    bool                      IVR_EffectsEnabled;
+    //Store the special effects filename
+    QString                   IVR_EffectsName;
+    //Flag to Know if we need apply a Special Effect;
+    bool                      IVR_CompressionEnabled;
+    //Counter for the compilations made
+    uint                      IVR_Compilations;
 
     //Thread Used to record Buffers
-    QFuture<void> IVR_BFThread;
     QFuture<void> IVR_CPThread;
-    QFuture<void> IVR_DTThread;
+    QFuture<void> IVR_BFThread;
 
-    //Mutex to protect the Thread
-    QMutex        IVR_Mutex;
+    //Timer Used to break the Takes in many pieces
+    QElapsedTimer IVR_CameraTimer;
+    QElapsedTimer IVR_TakeTimer;
+
 };
 
 #endif // CIVRVIRTUALCAMERA_H

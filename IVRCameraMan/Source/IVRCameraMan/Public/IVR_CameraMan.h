@@ -53,18 +53,24 @@ public:
 	void IVR_StopMan();
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = "true"), Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = "true"), Category = "Camera Man Parameters")
 	float                     IVR_CameraVelocity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Man Parameters")
 	float                     IVR_BaseTurnRate;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Man Parameters")
 	float                     IVR_BaseLookUpRate;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Man Parameters")
 	bool                      IVR_AutoStart;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Man Parameters")
 	bool                      IVR_AutoRecord;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Man Parameters")
 	ERecordingMode            IVR_RecordingMode;
+	UPROPERTY(EditAnywhere, Category = "Camera Man Parameters")
+	bool  IVR_UseEffects;
+	UPROPERTY(EditAnywhere, Category = "Camera Man Parameters")
+    FString  IVR_EffectName;
+	UPROPERTY(EditAnywhere, Category = "Camera Man Parameters")
+	bool     IVR_UseCompression;
 	
 	//If true this camera record Stabilized Frames on the HD.(Used To know the correct files to load).
 	TArray<AIVR_CameraMan*>    IVR_ChildCams;
